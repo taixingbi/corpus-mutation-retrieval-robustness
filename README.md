@@ -46,8 +46,12 @@ facm -c configs/smoke.yaml run
 # 50-seed pilot with real BGE / E5 / GTE (shares pilot/0_base)
 facm -c configs/pilot_small.yaml run
 
-# Full 200-seed pilot
+# Full 200-seed pilot (1 attempt / failure)
 facm -c configs/pilot.yaml run
+
+# Scaled generation for RQ4 (~150 recoverable cases / failure)
+# Oversamples noise×10 and hard_negative×6; shared Hybrid Top-20 pool
+facm -c configs/pilot_scale.yaml run
 ```
 
 ## Schemas
@@ -61,7 +65,8 @@ New: `Mutation.json`, `BehaviorValidation.json`, `RetrievalResult.json`, `Rerank
 - **RQ1** Semantic Success Rate  
 - **RQ2** Behavioral Success Rate (failure-specific criteria)  
 - **RQ3** Held-out challenge rate (E5-large, GTE-large)  
-- **RQ4** Retrieval Recovery Rate after ECS rerankers  
+- **RQ4** Rerank recovery on a **fixed Hybrid Top-K pool** (Hit@1, Recall@5, MRR@10, nDCG@10 + bootstrap CI / paired Wilcoxon).  
+  `missing` is an **unrecoverable negative control** (gold removed); other failures are recoverable only if gold stays in the pool.
 
 Ablation: Raw LLM → +Semantic → +Semantic+Behavioral on held-out challenge rate.
 
@@ -76,6 +81,10 @@ embed_batch_size: 128    # SentenceTransformer.encode batch size
 embed_device: null       # null = auto (cuda > mps > cpu)
 rerank_concurrency: 1    # ECS /v1/rerank in-flight limit (1 = serialized)
 http_retries: 5          # chat + rerank retry on 502/503/timeout
+rerank_pool_size: 20     # shared Hybrid Top-K for every reranker
+mutation_oversample:     # attempts per (seed, failure); noise/HN need more
+  noise: 10
+  hard_negative: 6
 ```
 
 `llm_concurrency: 1` forces fully sequential runs (debug).

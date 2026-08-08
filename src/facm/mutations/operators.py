@@ -64,10 +64,16 @@ def _llm_chunk(
     return text
 
 
-def generate_missing(seed: CleanSeed, model: str = "rule") -> Mutation:
+def _mid(seed: CleanSeed, failure: str, attempt: int = 1) -> str:
+    return f"{seed.sample_id}_{failure}_{attempt:02d}"
+
+
+def generate_missing(
+    seed: CleanSeed, model: str = "rule", *, attempt: int = 1
+) -> Mutation:
     gold = seed.gold_chunk_id
     return Mutation(
-        mutation_id=f"{seed.sample_id}_missing_01",
+        mutation_id=_mid(seed, "missing", attempt),
         sample_id=seed.sample_id,
         failure="missing",
         original_gold_ids=[gold],
@@ -76,10 +82,13 @@ def generate_missing(seed: CleanSeed, model: str = "rule") -> Mutation:
         generator=GeneratorInfo(model=model, prompt_id="missing_remove_gold", temperature=0),
         question=seed.question,
         gold_answer=seed.gold_answer,
+        metadata={"attempt": attempt},
     )
 
 
-def generate_boundary(seed: CleanSeed, corpus: Corpus) -> Mutation | None:
+def generate_boundary(
+    seed: CleanSeed, corpus: Corpus, *, attempt: int = 1
+) -> Mutation | None:
     """Split gold so full evidence is no longer in one chunk.
 
     Piece A: surrounding context with the supporting sentence removed.
@@ -94,10 +103,11 @@ def generate_boundary(seed: CleanSeed, corpus: Corpus) -> Mutation | None:
         a, b = _split_sentence(gold.text)
         if not a or not b:
             return None
-        id_a = f"{seed.gold_chunk_id}_a"
-        id_b = f"{seed.gold_chunk_id}_b"
+        suf = "" if attempt == 1 else f"_t{attempt}"
+        id_a = f"{seed.gold_chunk_id}_a{suf}"
+        id_b = f"{seed.gold_chunk_id}_b{suf}"
         return Mutation(
-            mutation_id=f"{seed.sample_id}_boundary_01",
+            mutation_id=_mid(seed, "boundary", attempt),
             sample_id=seed.sample_id,
             failure="boundary",
             original_gold_ids=[seed.gold_chunk_id],
@@ -134,6 +144,7 @@ def generate_boundary(seed: CleanSeed, corpus: Corpus) -> Mutation | None:
             metadata={
                 "split_pieces": [a, b],
                 "answer_piece_ids": [id_b],
+                "attempt": attempt,
             },
         )
 
@@ -143,10 +154,11 @@ def generate_boundary(seed: CleanSeed, corpus: Corpus) -> Mutation | None:
         # Ensure A is non-empty: use first half of sentence as weak context.
         a_fallback, b_fallback = _split_sentence(sentence)
         context, sentence = a_fallback, b_fallback
-    id_a = f"{seed.gold_chunk_id}_a"
-    id_b = f"{seed.gold_chunk_id}_b"
+    suf = "" if attempt == 1 else f"_t{attempt}"
+    id_a = f"{seed.gold_chunk_id}_a{suf}"
+    id_b = f"{seed.gold_chunk_id}_b{suf}"
     return Mutation(
-        mutation_id=f"{seed.sample_id}_boundary_01",
+        mutation_id=_mid(seed, "boundary", attempt),
         sample_id=seed.sample_id,
         failure="boundary",
         original_gold_ids=[seed.gold_chunk_id],
@@ -183,6 +195,7 @@ def generate_boundary(seed: CleanSeed, corpus: Corpus) -> Mutation | None:
         metadata={
             "split_pieces": [context, sentence],
             "answer_piece_ids": [id_b],
+            "attempt": attempt,
         },
     )
 
@@ -194,6 +207,8 @@ def generate_hard_negative(
     model: str,
     temperature: float,
     max_tokens: int,
+    *,
+    attempt: int = 1,
 ) -> Mutation | None:
     gold = corpus.get(seed.gold_chunk_id)
     style = gold.text[:500] if gold else ""
@@ -220,9 +235,9 @@ def generate_hard_negative(
     )
     if _contains_answer(text, seed.gold_answer):
         return None
-    cid = f"{seed.sample_id}_hn_01"
+    cid = f"{seed.sample_id}_hn_{attempt:02d}"
     return Mutation(
-        mutation_id=f"{seed.sample_id}_hard_negative_01",
+        mutation_id=_mid(seed, "hard_negative", attempt),
         sample_id=seed.sample_id,
         failure="hard_negative",
         original_gold_ids=[seed.gold_chunk_id],
@@ -237,6 +252,7 @@ def generate_hard_negative(
         generator=GeneratorInfo(model=model, prompt_id="hard_negative", temperature=temperature),
         question=seed.question,
         gold_answer=seed.gold_answer,
+        metadata={"attempt": attempt},
     )
 
 
@@ -247,6 +263,8 @@ def generate_conflict(
     model: str,
     temperature: float,
     max_tokens: int,
+    *,
+    attempt: int = 1,
 ) -> Mutation | None:
     gold = corpus.get(seed.gold_chunk_id)
     style = gold.text[:500] if gold else ""
@@ -271,9 +289,9 @@ def generate_conflict(
         temperature=temperature,
         max_tokens=max_tokens,
     )
-    cid = f"{seed.sample_id}_conflict_01"
+    cid = f"{seed.sample_id}_conflict_{attempt:02d}"
     return Mutation(
-        mutation_id=f"{seed.sample_id}_conflict_01",
+        mutation_id=_mid(seed, "conflict", attempt),
         sample_id=seed.sample_id,
         failure="conflict",
         original_gold_ids=[seed.gold_chunk_id],
@@ -288,10 +306,13 @@ def generate_conflict(
         generator=GeneratorInfo(model=model, prompt_id="conflict", temperature=temperature),
         question=seed.question,
         gold_answer=seed.gold_answer,
+        metadata={"attempt": attempt},
     )
 
 
-def _select_noise_chunks(seed: CleanSeed, corpus: Corpus, n: int) -> list[Chunk]:
+def _select_noise_chunks(
+    seed: CleanSeed, corpus: Corpus, n: int, *, offset: int = 0
+) -> list[Chunk]:
     q_tokens = set(seed.question.lower().split())
     pool: list[Chunk] = []
     for c in corpus.all():
@@ -302,7 +323,17 @@ def _select_noise_chunks(seed: CleanSeed, corpus: Corpus, n: int) -> list[Chunk]
         if len(q_tokens & set(c.text.lower().split())) > 0:
             pool.append(c)
     pool.sort(key=lambda c: len(q_tokens & set(c.text.lower().split())), reverse=True)
-    return pool[:n]
+    start = max(0, offset * n)
+    chosen = pool[start : start + n]
+    if len(chosen) < n and start > 0:
+        # wrap / backfill from head for remaining slots
+        for c in pool:
+            if c in chosen:
+                continue
+            chosen.append(c)
+            if len(chosen) >= n:
+                break
+    return chosen[:n]
 
 
 def generate_noise(
@@ -313,12 +344,14 @@ def generate_noise(
     model: str = "corpus",
     temperature: float = 0.0,
     max_tokens: int = 512,
+    *,
+    attempt: int = 1,
 ) -> Mutation | None:
-    chosen = _select_noise_chunks(seed, corpus, n)
+    chosen = _select_noise_chunks(seed, corpus, n, offset=attempt - 1)
     payloads: dict[str, ChunkPayload] = {}
     add_ids: list[str] = []
     for i, c in enumerate(chosen):
-        cid = f"{seed.sample_id}_noise_{i:02d}"
+        cid = f"{seed.sample_id}_noise_t{attempt:02d}_{i:02d}"
         add_ids.append(cid)
         payloads[cid] = ChunkPayload(
             text=c.text,
@@ -351,7 +384,7 @@ def generate_noise(
             break
         if _contains_answer(text, seed.gold_answer):
             continue
-        cid = f"{seed.sample_id}_noise_{i:02d}"
+        cid = f"{seed.sample_id}_noise_t{attempt:02d}_{i:02d}"
         add_ids.append(cid)
         payloads[cid] = ChunkPayload(
             text=text, metadata={"role": "noise", "page_title": "Noise", "source": "llm"}
@@ -359,7 +392,7 @@ def generate_noise(
     if not add_ids:
         return None
     return Mutation(
-        mutation_id=f"{seed.sample_id}_noise_01",
+        mutation_id=_mid(seed, "noise", attempt),
         sample_id=seed.sample_id,
         failure="noise",
         original_gold_ids=[seed.gold_chunk_id],
@@ -373,6 +406,7 @@ def generate_noise(
         ),
         question=seed.question,
         gold_answer=seed.gold_answer,
+        metadata={"attempt": attempt},
     )
 
 
@@ -386,23 +420,32 @@ def generate_one_mutation(
     temperature: float,
     max_tokens: int,
     noise_add_count: int,
+    attempt: int = 1,
 ) -> Mutation | None:
-    """Generate a single (seed, failure) mutation. Thread-safe if ChatClient is."""
+    """Generate a single (seed, failure[, attempt]) mutation."""
+    # Deterministic operators: only one useful attempt
+    if failure in {"missing", "boundary"} and attempt > 1:
+        return None
+    temp = temperature
+    if attempt > 1 and failure in {"hard_negative", "conflict", "noise"}:
+        temp = min(0.9, temperature + 0.25 * (attempt - 1))
     try:
         if failure == "missing":
-            return generate_missing(seed)
+            return generate_missing(seed, attempt=attempt)
         if failure == "boundary":
-            return generate_boundary(seed, corpus)
+            return generate_boundary(seed, corpus, attempt=attempt)
         if failure == "hard_negative":
             if chat is None:
                 return None
             return generate_hard_negative(
-                seed, corpus, chat, model, temperature, max_tokens
+                seed, corpus, chat, model, temp, max_tokens, attempt=attempt
             )
         if failure == "conflict":
             if chat is None:
                 return None
-            return generate_conflict(seed, corpus, chat, model, temperature, max_tokens)
+            return generate_conflict(
+                seed, corpus, chat, model, temp, max_tokens, attempt=attempt
+            )
         if failure == "noise":
             return generate_noise(
                 seed,
@@ -410,11 +453,12 @@ def generate_one_mutation(
                 noise_add_count,
                 chat=chat,
                 model=model,
-                temperature=temperature,
+                temperature=temp,
                 max_tokens=max_tokens,
+                attempt=attempt,
             )
     except Exception as exc:
-        print(f"[mutate] {seed.sample_id}/{failure} failed: {exc}")
+        print(f"[mutate] {seed.sample_id}/{failure}/t{attempt} failed: {exc}")
         return None
     return None
 
@@ -441,6 +485,7 @@ def generate_mutations_for_seed(
             temperature=temperature,
             max_tokens=max_tokens,
             noise_add_count=noise_add_count,
+            attempt=1,
         )
         if mut is not None:
             out.append(mut)

@@ -1,0 +1,67 @@
+# Scaled pilot: oversample weak RQ4 funnels (noise / hard_negative).
+# Reverse-engineered from pilot: ~6–9 recovery-defined cases for noise/HN
+# at 200 seeds → ~8–10× generation for ~150 recoverable-in-pool cases.
+run_id: pilot_scale
+base_dir: data/runs/pilot/0_base
+output_dir: data/runs/pilot_scale
+
+failures:
+  - missing
+  - hard_negative
+  - conflict
+  - boundary
+  - noise
+
+construction_retrievers:
+  - bm25
+  - bge_base
+  - hybrid
+
+held_out_retrievers:
+  - e5_large
+  - gte_large
+
+dense_models:
+  bge_base: BAAI/bge-base-en-v1.5
+  e5_large: intfloat/e5-large-v2
+  gte_large: thenlper/gte-large
+
+rrf_k: 60
+top_k: 20
+rerank_top_n: 5
+# Fixed shared Hybrid candidate pool for every reranker
+rerank_pool_size: 20
+
+chat:
+  model: openai.gpt-oss-120b-1:0
+  temperature: 0
+  max_tokens: 1024
+  judge_max_tokens: 1024
+
+rerankers:
+  - cross-encoder/ms-marco-MiniLM-L6-v2
+  - jinaai/jina-reranker-v2-base-multilingual
+  - mixedbread-ai/mxbai-rerank-large-v1
+  - BAAI/bge-reranker-v2-m3
+
+noise_add_count: 5
+behavioral_majority: 2
+seed_limit: null
+llm_concurrency: 8
+embed_concurrency: 1
+embed_batch_size: 128
+embed_device: null
+rerank_concurrency: 1
+http_retries: 5
+
+# Attempts per (seed, failure). missing/boundary ignore attempt>1.
+mutation_oversample:
+  missing: 1
+  hard_negative: 6
+  conflict: 2
+  boundary: 1
+  noise: 10
+
+rq4_target_recoverable: 150
+bootstrap_n: 1000
+bootstrap_seed: 0

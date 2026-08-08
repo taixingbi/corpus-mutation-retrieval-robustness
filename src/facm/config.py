@@ -65,6 +65,22 @@ class AppConfig(BaseModel):
     # Remote ECS rerank: 1 = no concurrent /v1/rerank calls
     rerank_concurrency: int = 1
     http_retries: int = 5
+    # Shared Hybrid candidate pool size for ALL rerankers (fair compare)
+    rerank_pool_size: int = 20
+    # Per-failure generation attempts (oversample weak RQ4 funnels)
+    mutation_oversample: dict[str, int] = Field(
+        default_factory=lambda: {
+            "missing": 1,
+            "hard_negative": 1,
+            "conflict": 1,
+            "boundary": 1,
+            "noise": 1,
+        }
+    )
+    # Soft target for recoverable (or missing control) cases in RQ4 reporting
+    rq4_target_recoverable: int = 150
+    bootstrap_n: int = 1000
+    bootstrap_seed: int = 0
 
     @property
     def base_path(self) -> Path:

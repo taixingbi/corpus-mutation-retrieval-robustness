@@ -51,3 +51,13 @@ embed_device: null
 # 1 = serialize ECS /v1/rerank (avoids ALB 502 stampede)
 rerank_concurrency: 1
 http_retries: 5
+rerank_pool_size: 20
+mutation_oversample:
+  missing: 1
+  hard_negative: 1
+  conflict: 1
+  boundary: 1
+  noise: 1
+rq4_target_recoverable: 150
+bootstrap_n: 1000
+bootstrap_seed: 0

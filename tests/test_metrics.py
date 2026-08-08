@@ -6,8 +6,11 @@ def test_mrr_and_recall():
     ranked = ["a", "b", "gold", "c"]
     m = compute_ranking_metrics(ranked, ["gold"])
     assert m["mrr"] == 1 / 3
+    assert m["mrr_at_10"] == 1 / 3
+    assert m["hit_at_1"] == 0.0
     assert m["hit_at_5"] == 1.0
     assert m["recall_at_5"] == 1.0
+    assert m["ndcg_at_10"] > 0.0
 
 
 def test_recovery_rate():

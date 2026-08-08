@@ -133,10 +133,19 @@ def stage1_mutate(cfg: AppConfig, *, require_llm: bool = True) -> list[Mutation]
         except RuntimeError as exc:
             print(f"[mutate] LLM unavailable ({exc}); rule/corpus operators only")
 
-    jobs = [(seed, failure) for seed in seeds for failure in cfg.failures]
+    jobs: list[tuple[CleanSeed, str, int]] = []
+    for seed in seeds:
+        for failure in cfg.failures:
+            n_try = max(1, int(cfg.mutation_oversample.get(failure, 1)))
+            for attempt in range(1, n_try + 1):
+                jobs.append((seed, failure, attempt))
+    print(
+        f"[mutate] {len(seeds)} seeds × oversample → {len(jobs)} generation jobs "
+        f"(target ~{cfg.rq4_target_recoverable} recoverable/failure)"
+    )
 
-    def _job(item: tuple[CleanSeed, str]) -> Mutation | None:
-        seed, failure = item
+    def _job(item: tuple[CleanSeed, str, int]) -> Mutation | None:
+        seed, failure, attempt = item
         return generate_one_mutation(
             seed,
             corpus,
@@ -146,6 +155,7 @@ def stage1_mutate(cfg: AppConfig, *, require_llm: bool = True) -> list[Mutation]
             temperature=cfg.chat.temperature,
             max_tokens=cfg.chat.max_tokens,
             noise_add_count=cfg.noise_add_count,
+            attempt=attempt,
         )
 
     results = map_concurrent(
@@ -293,7 +303,10 @@ def stage4_benchmark(
         )
         text_by_id = {c.chunk_id: c.text for c in mutated.all()}
         ret_rows: list[RetrievalResult] = []
-        hybrid_top: list[tuple[str, str]] = []
+        # Fixed shared Hybrid pool for ALL rerankers (may differ from top_k for RQ metrics)
+        pool_k = max(cfg.rerank_pool_size, cfg.rerank_top_n)
+        hybrid_ids, _ = _search_ids(retrievers["hybrid"], seed.question, pool_k)
+        hybrid_top = [(cid, text_by_id.get(cid, "")) for cid in hybrid_ids]
         for name in names:
             ids, scores = _search_ids(retrievers[name], seed.question, cfg.top_k)
             ret_rows.append(
@@ -309,8 +322,6 @@ def stage4_benchmark(
                     failure=mutation.failure,
                 )
             )
-            if name == "hybrid":
-                hybrid_top = [(cid, text_by_id.get(cid, "")) for cid in ids]
 
         rr_rows: list[RerankerResult] = []
         clean_m = lookup_clean_hybrid_metrics(clean_results, seed.sample_id)
@@ -323,6 +334,7 @@ def stage4_benchmark(
                 client=rerank_client,
                 top_n=cfg.rerank_top_n,
                 clean_metrics=clean_m,
+                candidate_pool=f"hybrid_top_{pool_k}",
             )
         return ret_rows, rr_rows
 
@@ -345,6 +357,8 @@ def stage4_benchmark(
         behavior=list(read_jsonl(cfg.output_path / "4_behavior" / "behavior_validation.jsonl")),
         retrieval=[r.model_dump(mode="json") for r in retrieval_out],
         rerank=[r.model_dump(mode="json") for r in rerank_out],
+        n_boot=cfg.bootstrap_n,
+        bootstrap_seed=cfg.bootstrap_seed,
     )
     write_report(Path("reports") / cfg.run_id / "rq_report.json", report)
     write_report(cfg.output_path / "5_benchmark" / "rq_report.json", report)

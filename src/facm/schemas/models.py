@@ -133,11 +133,15 @@ class RetrievalResult(BaseModel):
     ranked_ids: list[str]
     scores: list[float] = Field(default_factory=list)
     relevant_ids: list[str] = Field(default_factory=list)
+    hit_at_1: float = 0.0
     hit_at_5: float = 0.0
     recall_at_5: float = 0.0
+    recall_at_10: float = 0.0
     recall_at_20: float = 0.0
     mrr: float = 0.0
+    mrr_at_10: float = 0.0
     ndcg_at_5: float = 0.0
+    ndcg_at_10: float = 0.0
     ndcg_at_20: float = 0.0
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -151,16 +155,32 @@ class RerankerResult(BaseModel):
     pre_ranked_ids: list[str]
     post_ranked_ids: list[str]
     relevant_ids: list[str]
+    # Absolute metrics on shared Hybrid Top-K pool (pre) and reranked list (post)
+    hit_at_1_pre: float = 0.0
+    hit_at_1_post: float = 0.0
     recall_at_5_pre: float = 0.0
     recall_at_5_post: float = 0.0
     mrr_pre: float = 0.0
     mrr_post: float = 0.0
+    mrr_at_10_pre: float = 0.0
+    mrr_at_10_post: float = 0.0
     ndcg_at_5_pre: float = 0.0
     ndcg_at_5_post: float = 0.0
+    ndcg_at_10_pre: float = 0.0
+    ndcg_at_10_post: float = 0.0
+    recovery_hit_at_1: float | None = None
     recovery_recall_at_5: float | None = None
     recovery_mrr: float | None = None
+    recovery_mrr_at_10: float | None = None
     recovery_ndcg_at_5: float | None = None
+    recovery_ndcg_at_10: float | None = None
+    clean_hit_at_1: float | None = None
     clean_recall_at_5: float | None = None
     clean_mrr: float | None = None
+    clean_mrr_at_10: float | None = None
     clean_ndcg_at_5: float | None = None
+    clean_ndcg_at_10: float | None = None
+    # recoverable | unrecoverable_control | out_of_pool
+    recoverability: str = "out_of_pool"
+    candidate_pool: str = "hybrid_top_20"
     metadata: dict[str, Any] = Field(default_factory=dict)

@@ -28,6 +28,11 @@ def mrr(ranked_ids: Sequence[str], relevant_ids: Sequence[str]) -> float:
     return 0.0
 
 
+def mrr_at_k(ranked_ids: Sequence[str], relevant_ids: Sequence[str], k: int) -> float:
+    """MRR restricted to top-k (0 if first relevant is beyond k)."""
+    return mrr(ranked_ids[:k], relevant_ids)
+
+
 def _dcg(relevances: Sequence[float]) -> float:
     return sum(rel / math.log2(i + 2) for i, rel in enumerate(relevances))
 
@@ -65,10 +70,30 @@ def compute_ranking_metrics(
     ranked_ids: Sequence[str], relevant_ids: Sequence[str]
 ) -> dict[str, float]:
     return {
+        "hit_at_1": hit_at_k(ranked_ids, relevant_ids, 1),
         "hit_at_5": hit_at_k(ranked_ids, relevant_ids, 5),
         "recall_at_5": recall_at_k(ranked_ids, relevant_ids, 5),
+        "recall_at_10": recall_at_k(ranked_ids, relevant_ids, 10),
         "recall_at_20": recall_at_k(ranked_ids, relevant_ids, 20),
         "mrr": mrr(ranked_ids, relevant_ids),
+        "mrr_at_10": mrr_at_k(ranked_ids, relevant_ids, 10),
         "ndcg_at_5": ndcg_at_k(ranked_ids, relevant_ids, 5),
+        "ndcg_at_10": ndcg_at_k(ranked_ids, relevant_ids, 10),
         "ndcg_at_20": ndcg_at_k(ranked_ids, relevant_ids, 20),
     }
+
+
+def gold_in_pool(ranked_ids: Sequence[str], relevant_ids: Sequence[str]) -> bool:
+    if not relevant_ids:
+        return False
+    pool = set(ranked_ids)
+    return any(r in pool for r in relevant_ids)
+
+
+def recoverability_class(failure: str, ranked_ids: Sequence[str], relevant_ids: Sequence[str]) -> str:
+    """missing = unrecoverable negative control; else gold-in-pool ⇒ recoverable."""
+    if failure == "missing":
+        return "unrecoverable_control"
+    if gold_in_pool(ranked_ids, relevant_ids):
+        return "recoverable"
+    return "out_of_pool"
