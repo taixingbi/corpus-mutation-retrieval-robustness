@@ -1,0 +1,116 @@
+{
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "chunk_id": {
+      "title": "Chunk Id",
+      "type": "string"
+    },
+    "page_id": {
+      "title": "Page Id",
+      "type": "integer"
+    },
+    "revision_id": {
+      "title": "Revision Id",
+      "type": "integer"
+    },
+    "page_title": {
+      "title": "Page Title",
+      "type": "string"
+    },
+    "section_path": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Section Path",
+      "type": "array"
+    },
+    "section_title": {
+      "title": "Section Title",
+      "type": "string"
+    },
+    "paragraph_index": {
+      "title": "Paragraph Index",
+      "type": "integer"
+    },
+    "chunk_index": {
+      "title": "Chunk Index",
+      "type": "integer"
+    },
+    "token_count": {
+      "title": "Token Count",
+      "type": "integer"
+    },
+    "char_start": {
+      "title": "Char Start",
+      "type": "integer"
+    },
+    "char_end": {
+      "title": "Char End",
+      "type": "integer"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "previous_chunk_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Chunk Id"
+    },
+    "next_chunk_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Chunk Id"
+    },
+    "category_group": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category Group"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "chunk_id",
+    "page_id",
+    "revision_id",
+    "page_title",
+    "section_title",
+    "paragraph_index",
+    "chunk_index",
+    "token_count",
+    "char_start",
+    "char_end",
+    "text"
+  ],
+  "title": "Chunk",
+  "type": "object"
+}

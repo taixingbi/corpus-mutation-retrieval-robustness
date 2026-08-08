@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "SourceRef": {
+      "properties": {
+        "page_id": {
+          "title": "Page Id",
+          "type": "integer"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "integer"
+        },
+        "page_title": {
+          "title": "Page Title",
+          "type": "string"
+        },
+        "section_title": {
+          "title": "Section Title",
+          "type": "string"
+        },
+        "chunk_id": {
+          "title": "Chunk Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page_id",
+        "revision_id",
+        "page_title",
+        "section_title",
+        "chunk_id"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sample_id": {
+      "title": "Sample Id",
+      "type": "string"
+    },
+    "question": {
+      "title": "Question",
+      "type": "string"
+    },
+    "gold_answer": {
+      "title": "Gold Answer",
+      "type": "string"
+    },
+    "supporting_sentence": {
+      "title": "Supporting Sentence",
+      "type": "string"
+    },
+    "clean_contexts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Clean Contexts",
+      "type": "array"
+    },
+    "answer_type": {
+      "title": "Answer Type",
+      "type": "string"
+    },
+    "difficulty": {
+      "default": "easy",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "title": "Difficulty",
+      "type": "string"
+    },
+    "reasoning_type": {
+      "default": "single_fact",
+      "title": "Reasoning Type",
+      "type": "string"
+    },
+    "is_time_sensitive": {
+      "default": false,
+      "title": "Is Time Sensitive",
+      "type": "boolean"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceRef"
+    },
+    "category_group": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category Group"
+    },
+    "quality_score": {
+      "default": 1.0,
+      "title": "Quality Score",
+      "type": "number"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "sample_id",
+    "question",
+    "gold_answer",
+    "supporting_sentence",
+    "answer_type",
+    "source"
+  ],
+  "title": "CleanSeed",
+  "type": "object"
+}

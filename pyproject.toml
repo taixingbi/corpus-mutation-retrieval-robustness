@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "facm"
+version = "0.1.0"
+description = "Failure-aware Corpus Mutation for Retrieval and Reranking Evaluation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.6",
+  "PyYAML>=6.0",
+  "httpx>=0.27",
+  "numpy>=1.26",
+  "rank-bm25>=0.2.2",
+  "sentence-transformers>=3.0",
+  "python-dotenv>=1.0",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+facm = "facm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

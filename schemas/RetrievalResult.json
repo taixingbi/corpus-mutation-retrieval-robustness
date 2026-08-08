@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RetrievalResult",
+  "type": "object",
+  "required": ["sample_id", "retriever", "retriever_role", "ranked_ids"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "mutation_id": {"type": ["string", "null"]},
+    "sample_id": {"type": "string"},
+    "failure": {"type": ["string", "null"]},
+    "stage": {"type": "string"},
+    "retriever": {"type": "string"},
+    "retriever_role": {"type": "string", "enum": ["construction", "held_out"]},
+    "ranked_ids": {"type": "array", "items": {"type": "string"}},
+    "scores": {"type": "array", "items": {"type": "number"}},
+    "relevant_ids": {"type": "array", "items": {"type": "string"}},
+    "hit_at_5": {"type": "number"},
+    "recall_at_5": {"type": "number"},
+    "recall_at_20": {"type": "number"},
+    "mrr": {"type": "number"},
+    "ndcg_at_5": {"type": "number"},
+    "ndcg_at_20": {"type": "number"},
+    "metadata": {"type": "object"}
+  }
+}

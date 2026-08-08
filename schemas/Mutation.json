@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mutation",
+  "type": "object",
+  "required": [
+    "mutation_id",
+    "sample_id",
+    "failure",
+    "original_gold_ids",
+    "mutated_relevant_ids"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "default": "1.0"},
+    "mutation_id": {"type": "string"},
+    "sample_id": {"type": "string"},
+    "failure": {
+      "type": "string",
+      "enum": ["missing", "hard_negative", "conflict", "boundary", "noise"]
+    },
+    "original_gold_ids": {"type": "array", "items": {"type": "string"}},
+    "mutated_relevant_ids": {"type": "array", "items": {"type": "string"}},
+    "add": {"type": "array", "items": {"type": "string"}},
+    "remove": {"type": "array", "items": {"type": "string"}},
+    "replace": {"type": "object", "additionalProperties": {"type": "string"}},
+    "chunk_payloads": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {"type": "string"},
+          "metadata": {"type": "object"}
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "properties": {
+        "model": {"type": "string"},
+        "prompt_id": {"type": "string"},
+        "temperature": {"type": "number"}
+      }
+    },
+    "semantic": {
+      "type": "object",
+      "properties": {
+        "passed": {"type": ["boolean", "null"]},
+        "checks": {"type": "object"}
+      }
+    },
+    "question": {"type": "string"},
+    "gold_answer": {"type": "string"},
+    "metadata": {"type": "object"}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RerankerResult",
+  "type": "object",
+  "required": ["mutation_id", "sample_id", "failure", "reranker", "pre_ranked_ids", "post_ranked_ids", "relevant_ids"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "mutation_id": {"type": "string"},
+    "sample_id": {"type": "string"},
+    "failure": {"type": "string"},
+    "reranker": {"type": "string"},
+    "pre_ranked_ids": {"type": "array", "items": {"type": "string"}},
+    "post_ranked_ids": {"type": "array", "items": {"type": "string"}},
+    "relevant_ids": {"type": "array", "items": {"type": "string"}},
+    "recall_at_5_pre": {"type": "number"},
+    "recall_at_5_post": {"type": "number"},
+    "mrr_pre": {"type": "number"},
+    "mrr_post": {"type": "number"},
+    "ndcg_at_5_pre": {"type": "number"},
+    "ndcg_at_5_post": {"type": "number"},
+    "recovery_recall_at_5": {"type": ["number", "null"]},
+    "recovery_mrr": {"type": ["number", "null"]},
+    "recovery_ndcg_at_5": {"type": ["number", "null"]},
+    "clean_recall_at_5": {"type": ["number", "null"]},
+    "clean_mrr": {"type": ["number", "null"]},
+    "clean_ndcg_at_5": {"type": ["number", "null"]},
+    "metadata": {"type": "object"}
+  }
+}

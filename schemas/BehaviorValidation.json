@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BehaviorValidation",
+  "type": "object",
+  "required": ["mutation_id", "sample_id", "failure", "retriever"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "mutation_id": {"type": "string"},
+    "sample_id": {"type": "string"},
+    "failure": {"type": "string"},
+    "retriever": {"type": "string"},
+    "retriever_role": {"type": "string", "enum": ["construction", "held_out"]},
+    "clean_relevant_ranks": {"type": "object"},
+    "mutated_relevant_ranks": {"type": "object"},
+    "failure_chunk_ranks": {"type": "object"},
+    "criterion_hits": {"type": "object"},
+    "accepted_for_retriever": {"type": "boolean"},
+    "accepted": {"type": ["boolean", "null"]},
+    "difficulty": {"type": ["string", "null"], "enum": ["easy", "medium", "hard", null]},
+    "metadata": {"type": "object"}
+  }
+}
