@@ -1,0 +1,244 @@
+{
+  "rq1_semantic_success": {
+    "boundary": {
+      "n": 96,
+      "semantic_success_rate": 1.0
+    },
+    "conflict": {
+      "n": 198,
+      "semantic_success_rate": 0.98989898989899
+    },
+    "hard_negative": {
+      "n": 193,
+      "semantic_success_rate": 0.9533678756476683
+    },
+    "missing": {
+      "n": 200,
+      "semantic_success_rate": 1.0
+    },
+    "noise": {
+      "n": 200,
+      "semantic_success_rate": 1.0
+    }
+  },
+  "rq2_behavioral_success": {
+    "boundary": {
+      "n": 96,
+      "behavioral_success_rate": 0.875
+    },
+    "conflict": {
+      "n": 196,
+      "behavioral_success_rate": 0.9846938775510204
+    },
+    "hard_negative": {
+      "n": 184,
+      "behavioral_success_rate": 0.8641304347826086
+    },
+    "missing": {
+      "n": 200,
+      "behavioral_success_rate": 1.0
+    },
+    "noise": {
+      "n": 200,
+      "behavioral_success_rate": 0.37
+    }
+  },
+  "rq3_held_out_generalization": {
+    "missing": {
+      "e5_large": {
+        "n": 200,
+        "challenge_rate": 0.475,
+        "mean_delta_mrr": 0.42291287878787875,
+        "mean_delta_recall@5": 0.465
+      },
+      "gte_large": {
+        "n": 200,
+        "challenge_rate": 0.46,
+        "mean_delta_mrr": 0.3635952380952381,
+        "mean_delta_recall@5": 0.43
+      }
+    },
+    "hard_negative": {
+      "e5_large": {
+        "n": 159,
+        "challenge_rate": 0.08176100628930817,
+        "mean_delta_mrr": 0.02545422781271838,
+        "mean_delta_recall@5": 0.006289308176100629
+      },
+      "gte_large": {
+        "n": 159,
+        "challenge_rate": 0.16352201257861634,
+        "mean_delta_mrr": 0.049494609164420486,
+        "mean_delta_recall@5": 0.0
+      }
+    },
+    "conflict": {
+      "e5_large": {
+        "n": 193,
+        "challenge_rate": 0.3471502590673575,
+        "mean_delta_mrr": 0.14575417386298214,
+        "mean_delta_recall@5": 0.0051813471502590676
+      },
+      "gte_large": {
+        "n": 193,
+        "challenge_rate": 0.37305699481865284,
+        "mean_delta_mrr": 0.13305660229235358,
+        "mean_delta_recall@5": 0.015544041450777202
+      }
+    },
+    "boundary": {
+      "e5_large": {
+        "n": 84,
+        "challenge_rate": 0.4166666666666667,
+        "mean_delta_mrr": -0.06398809523809523,
+        "mean_delta_recall@5": 0.19047619047619047
+      },
+      "gte_large": {
+        "n": 84,
+        "challenge_rate": 0.35714285714285715,
+        "mean_delta_mrr": -0.17001133786848074,
+        "mean_delta_recall@5": 0.11904761904761904
+      }
+    },
+    "noise": {
+      "e5_large": {
+        "n": 74,
+        "challenge_rate": 0.05405405405405406,
+        "mean_delta_mrr": 0.007207207207207208,
+        "mean_delta_recall@5": 0.013513513513513514
+      },
+      "gte_large": {
+        "n": 74,
+        "challenge_rate": 0.0945945945945946,
+        "mean_delta_mrr": 0.008220720720720722,
+        "mean_delta_recall@5": 0.0
+      }
+    }
+  },
+  "rq4_reranker_recovery": {
+    "missing": {
+      "none": {
+        "n": 94,
+        "mean_recovery_mrr": 0.0
+      },
+      "cross-encoder/ms-marco-MiniLM-L6-v2": {
+        "n": 94,
+        "mean_recovery_mrr": 0.0
+      },
+      "jinaai/jina-reranker-v2-base-multilingual": {
+        "n": 94,
+        "mean_recovery_mrr": 0.0
+      },
+      "mixedbread-ai/mxbai-rerank-large-v1": {
+        "n": 94,
+        "mean_recovery_mrr": 0.0
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "n": 94,
+        "mean_recovery_mrr": 0.0
+      }
+    },
+    "conflict": {
+      "none": {
+        "n": 32,
+        "mean_recovery_mrr": -0.4375000000000002
+      },
+      "cross-encoder/ms-marco-MiniLM-L6-v2": {
+        "n": 32,
+        "mean_recovery_mrr": 1.643229166666667
+      },
+      "jinaai/jina-reranker-v2-base-multilingual": {
+        "n": 32,
+        "mean_recovery_mrr": 5.299479166666668
+      },
+      "mixedbread-ai/mxbai-rerank-large-v1": {
+        "n": 32,
+        "mean_recovery_mrr": 2.2369791666666674
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "n": 32,
+        "mean_recovery_mrr": 2.531250000000001
+      }
+    },
+    "noise": {
+      "none": {
+        "n": 6,
+        "mean_recovery_mrr": -3.166666666666668
+      },
+      "cross-encoder/ms-marco-MiniLM-L6-v2": {
+        "n": 6,
+        "mean_recovery_mrr": 15.666666666666671
+      },
+      "jinaai/jina-reranker-v2-base-multilingual": {
+        "n": 6,
+        "mean_recovery_mrr": 32.33333333333334
+      },
+      "mixedbread-ai/mxbai-rerank-large-v1": {
+        "n": 6,
+        "mean_recovery_mrr": 20.77777777777779
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "n": 6,
+        "mean_recovery_mrr": 33.66666666666668
+      }
+    },
+    "boundary": {
+      "none": {
+        "n": 11,
+        "mean_recovery_mrr": -0.028409090909090908
+      },
+      "cross-encoder/ms-marco-MiniLM-L6-v2": {
+        "n": 11,
+        "mean_recovery_mrr": 0.9744318181818182
+      },
+      "jinaai/jina-reranker-v2-base-multilingual": {
+        "n": 11,
+        "mean_recovery_mrr": 0.90625
+      },
+      "mixedbread-ai/mxbai-rerank-large-v1": {
+        "n": 11,
+        "mean_recovery_mrr": 0.571969696969697
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "n": 11,
+        "mean_recovery_mrr": 0.9744318181818182
+      }
+    },
+    "hard_negative": {
+      "none": {
+        "n": 9,
+        "mean_recovery_mrr": -1.1111111111111107
+      },
+      "cross-encoder/ms-marco-MiniLM-L6-v2": {
+        "n": 9,
+        "mean_recovery_mrr": 12.44444444444444
+      },
+      "jinaai/jina-reranker-v2-base-multilingual": {
+        "n": 9,
+        "mean_recovery_mrr": 12.777777777777773
+      },
+      "mixedbread-ai/mxbai-rerank-large-v1": {
+        "n": 9,
+        "mean_recovery_mrr": 12.777777777777773
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "n": 9,
+        "mean_recovery_mrr": 13.55555555555555
+      }
+    }
+  },
+  "ablation_validation_filters": {
+    "raw_llm": {
+      "n_mutations": 887,
+      "held_out_challenge_rate": 0.25535512965050733
+    },
+    "plus_semantic": {
+      "n_mutations": 876,
+      "held_out_challenge_rate": 0.2574200913242009
+    },
+    "plus_semantic_behavioral": {
+      "n_mutations": 710,
+      "held_out_challenge_rate": 0.3105633802816901
+    }
+  }
+}

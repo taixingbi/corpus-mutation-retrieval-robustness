@@ -13,3 +13,4 @@ data/runs/*/3_semantic/
 data/runs/*/4_behavior/
 data/runs/*/5_benchmark/
 data/runs/*/_embed_cache/
+logs/
