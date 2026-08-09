@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "facm"
 version = "0.1.0"
-description = "Failure-aware Corpus Mutation for Retrieval and Reranking Evaluation"
+description = "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

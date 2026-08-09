@@ -1,3 +1,4 @@
+# Local smoke (MiniLM stand-ins)
 run_id: smoke
 base_dir: data/runs/smoke/0_base
 output_dir: data/runs/smoke
@@ -18,7 +19,6 @@ held_out_retrievers:
   - e5_large
   - gte_large
 
-# Smoke uses one small encoder for all dense slots (fast local). Pilot keeps real models.
 dense_models:
   bge_base: sentence-transformers/all-MiniLM-L6-v2
   e5_large: sentence-transformers/all-MiniLM-L6-v2
@@ -26,7 +26,6 @@ dense_models:
 
 rrf_k: 60
 top_k: 20
-rerank_top_n: 5
 
 chat:
   model: openai.gpt-oss-120b-1:0
@@ -34,31 +33,18 @@ chat:
   max_tokens: 1024
   judge_max_tokens: 1024
 
-rerankers:
-  - cross-encoder/ms-marco-MiniLM-L6-v2
-  - jinaai/jina-reranker-v2-base-multilingual
-  - mixedbread-ai/mxbai-rerank-large-v1
-  - BAAI/bge-reranker-v2-m3
-
 noise_add_count: 3
 behavioral_majority: 2
 seed_limit: null
-llm_concurrency: 8
-# 1 = encode one dense model at a time (safer on MPS)
+llm_concurrency: 4
 embed_concurrency: 1
-embed_batch_size: 128
-# null = auto (cuda > mps > cpu)
+embed_batch_size: 64
 embed_device: null
-# 1 = serialize ECS /v1/rerank (avoids ALB 502 stampede)
-rerank_concurrency: 1
-http_retries: 5
-rerank_pool_size: 20
+http_retries: 3
+
 mutation_oversample:
   missing: 1
   hard_negative: 1
   conflict: 1
   boundary: 1
   noise: 1
-rq4_target_recoverable: 20
-bootstrap_n: 200
-bootstrap_seed: 0

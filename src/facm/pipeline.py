@@ -3,21 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 from facm.clients.chat import ChatClient
-from facm.clients.rerank import RerankClient
 from facm.concurrent import map_concurrent
 from facm.config import AppConfig
 from facm.io import load_models, read_jsonl, write_jsonl
 from facm.metrics.ranking import compute_ranking_metrics
+from facm.mutations.mining import DistractorMiner
 from facm.mutations.operators import generate_one_mutation
 from facm.reporting.report import build_rq_report, write_report
-from facm.rerank.run import lookup_clean_hybrid_metrics, run_rerankers
 from facm.retrieval.corpus import Corpus, load_seeds
 from facm.retrieval.retrievers import Retriever, apply_mutation_retrievers, build_retrievers
 from facm.schemas.models import (
     BehaviorValidation,
     CleanSeed,
     Mutation,
-    RerankerResult,
     RetrievalResult,
 )
 from facm.validation.behavioral import aggregate_acceptance, validate_behavior_for_retriever
@@ -90,9 +88,8 @@ def stage0_clean_baseline(
     retrievers: dict[str, Retriever] | None = None,
 ) -> list[RetrievalResult]:
     if retrievers is None:
-        corpus, retrievers = build_base_retrievers(cfg, corpus)
-    else:
-        corpus = corpus or Corpus.from_jsonl(cfg.base_path / "chunks.jsonl")
+        print("[clean] loading/encoding base retrievers…")
+        _, retrievers = build_base_retrievers(cfg, corpus)
     seeds = load_seeds(cfg.base_path / "clean_seeds.jsonl", cfg.seed_limit)
     names = list(dict.fromkeys(cfg.construction_retrievers + cfg.held_out_retrievers))
 
@@ -133,16 +130,16 @@ def stage1_mutate(cfg: AppConfig, *, require_llm: bool = True) -> list[Mutation]
         except RuntimeError as exc:
             print(f"[mutate] LLM unavailable ({exc}); rule/corpus operators only")
 
+    print("[mutate] building BM25 distractor miner for HN/noise…")
+    miner = DistractorMiner.build(corpus)
+
     jobs: list[tuple[CleanSeed, str, int]] = []
     for seed in seeds:
         for failure in cfg.failures:
             n_try = max(1, int(cfg.mutation_oversample.get(failure, 1)))
             for attempt in range(1, n_try + 1):
                 jobs.append((seed, failure, attempt))
-    print(
-        f"[mutate] {len(seeds)} seeds × oversample → {len(jobs)} generation jobs "
-        f"(target ~{cfg.rq4_target_recoverable} recoverable/failure)"
-    )
+    print(f"[mutate] {len(seeds)} seeds × oversample → {len(jobs)} generation jobs")
 
     def _job(item: tuple[CleanSeed, str, int]) -> Mutation | None:
         seed, failure, attempt = item
@@ -156,6 +153,7 @@ def stage1_mutate(cfg: AppConfig, *, require_llm: bool = True) -> list[Mutation]
             max_tokens=cfg.chat.max_tokens,
             noise_add_count=cfg.noise_add_count,
             attempt=attempt,
+            miner=miner,
         )
 
     results = map_concurrent(
@@ -251,7 +249,6 @@ def stage3_behavioral(
 def stage4_benchmark(
     cfg: AppConfig,
     *,
-    run_rerank: bool = True,
     corpus: Corpus | None = None,
     retrievers: dict[str, Retriever] | None = None,
 ) -> None:
@@ -275,41 +272,19 @@ def stage4_benchmark(
 
     names = list(dict.fromkeys(cfg.construction_retrievers + cfg.held_out_retrievers))
     retrieval_out: list[RetrievalResult] = list(clean_results)
-
-    rerank_client = None
-    if run_rerank:
-        try:
-            rerank_client = RerankClient(
-                concurrency=cfg.rerank_concurrency,
-                retries=cfg.http_retries,
-            )
-            print(
-                f"[rerank] concurrency={cfg.rerank_concurrency} "
-                f"retries={cfg.http_retries}"
-            )
-        except RuntimeError as exc:
-            print(f"[rerank] unavailable ({exc}); writing none-baseline only")
-
     mutations = list(by_id.values())
 
-    def _one(
-        mutation: Mutation,
-    ) -> tuple[list[RetrievalResult], list[RerankerResult]]:
+    def _one(mutation: Mutation) -> list[RetrievalResult]:
         seed = seeds.get(mutation.sample_id)
         if seed is None:
-            return [], []
-        mutated, retrievers = apply_mutation_retrievers(
+            return []
+        _, mut_retrievers = apply_mutation_retrievers(
             base_retrievers, corpus, mutation, rrf_k=cfg.rrf_k
         )
-        text_by_id = {c.chunk_id: c.text for c in mutated.all()}
-        ret_rows: list[RetrievalResult] = []
-        # Fixed shared Hybrid pool for ALL rerankers (may differ from top_k for RQ metrics)
-        pool_k = max(cfg.rerank_pool_size, cfg.rerank_top_n)
-        hybrid_ids, _ = _search_ids(retrievers["hybrid"], seed.question, pool_k)
-        hybrid_top = [(cid, text_by_id.get(cid, "")) for cid in hybrid_ids]
+        rows: list[RetrievalResult] = []
         for name in names:
-            ids, scores = _search_ids(retrievers[name], seed.question, cfg.top_k)
-            ret_rows.append(
+            ids, scores = _search_ids(mut_retrievers[name], seed.question, cfg.top_k)
+            rows.append(
                 _make_result(
                     sample_id=seed.sample_id,
                     retriever=name,
@@ -322,49 +297,53 @@ def stage4_benchmark(
                     failure=mutation.failure,
                 )
             )
+        return rows
 
-        rr_rows: list[RerankerResult] = []
-        clean_m = lookup_clean_hybrid_metrics(clean_results, seed.sample_id)
-        if hybrid_top:
-            rr_rows = run_rerankers(
-                mutation=mutation,
-                query=seed.question,
-                hybrid_top=hybrid_top,
-                reranker_models=cfg.rerankers,
-                client=rerank_client,
-                top_n=cfg.rerank_top_n,
-                clean_metrics=clean_m,
-                candidate_pool=f"hybrid_top_{pool_k}",
-            )
-        return ret_rows, rr_rows
-
-    paired = map_concurrent(
+    nested = map_concurrent(
         mutations, _one, max_concurrency=cfg.llm_concurrency, desc="stage4-benchmark"
     )
-    rerank_out: list[RerankerResult] = []
-    for ret_rows, rr_rows in paired:
-        retrieval_out.extend(ret_rows)
-        rerank_out.extend(rr_rows)
+    for rows in nested:
+        retrieval_out.extend(rows)
 
     write_jsonl(cfg.output_path / "5_benchmark" / "retrieval_result.jsonl", retrieval_out)
-    write_jsonl(cfg.output_path / "5_benchmark" / "reranker_result.jsonl", rerank_out)
-
-    mut_path = cfg.output_path / "3_semantic" / "mutation.jsonl"
-    if not mut_path.exists():
-        mut_path = cfg.output_path / "2_mutations" / "mutation.jsonl"
-    report = build_rq_report(
-        mutations=list(read_jsonl(mut_path)),
-        behavior=list(read_jsonl(cfg.output_path / "4_behavior" / "behavior_validation.jsonl")),
-        retrieval=[r.model_dump(mode="json") for r in retrieval_out],
-        rerank=[r.model_dump(mode="json") for r in rerank_out],
-        n_boot=cfg.bootstrap_n,
-        bootstrap_seed=cfg.bootstrap_seed,
-    )
+    report = _build_report_from_paths(cfg, retrieval_out)
     write_report(Path("reports") / cfg.run_id / "rq_report.json", report)
     write_report(cfg.output_path / "5_benchmark" / "rq_report.json", report)
 
 
-def run_pipeline(cfg: AppConfig, *, skip_llm: bool = False, skip_rerank: bool = False) -> None:
+def _build_report_from_paths(
+    cfg: AppConfig,
+    retrieval: list[RetrievalResult] | list[dict] | None = None,
+) -> dict:
+    mut_path = cfg.output_path / "3_semantic" / "mutation.jsonl"
+    if not mut_path.exists():
+        mut_path = cfg.output_path / "2_mutations" / "mutation.jsonl"
+    beh_path = cfg.output_path / "4_behavior" / "behavior_validation.jsonl"
+    ret_path = cfg.output_path / "5_benchmark" / "retrieval_result.jsonl"
+    if retrieval is None:
+        ret_rows = list(read_jsonl(ret_path)) if ret_path.exists() else []
+    else:
+        ret_rows = [
+            r.model_dump(mode="json") if hasattr(r, "model_dump") else r for r in retrieval
+        ]
+    return build_rq_report(
+        mutations=list(read_jsonl(mut_path)) if mut_path.exists() else [],
+        behavior=list(read_jsonl(beh_path)) if beh_path.exists() else [],
+        retrieval=ret_rows,
+    )
+
+
+def rebuild_report(cfg: AppConfig) -> Path:
+    """Rebuild RQ1–RQ3 from existing stage JSONL outputs."""
+    report = _build_report_from_paths(cfg)
+    out = Path("reports") / cfg.run_id / "rq_report.json"
+    write_report(out, report)
+    write_report(cfg.output_path / "5_benchmark" / "rq_report.json", report)
+    print(f"[rebuild] wrote {out}")
+    return out
+
+
+def run_pipeline(cfg: AppConfig, *, skip_llm: bool = False) -> None:
     cfg.output_path.mkdir(parents=True, exist_ok=True)
     print("[run] building base retrievers once (disk-cached)…")
     corpus, base_retrievers = build_base_retrievers(cfg)
@@ -372,6 +351,4 @@ def run_pipeline(cfg: AppConfig, *, skip_llm: bool = False, skip_rerank: bool = 
     stage1_mutate(cfg, require_llm=not skip_llm)
     stage2_semantic(cfg, use_llm=not skip_llm)
     stage3_behavioral(cfg, corpus=corpus, retrievers=base_retrievers)
-    stage4_benchmark(
-        cfg, run_rerank=not skip_rerank, corpus=corpus, retrievers=base_retrievers
-    )
+    stage4_benchmark(cfg, corpus=corpus, retrievers=base_retrievers)

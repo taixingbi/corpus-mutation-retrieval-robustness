@@ -9,7 +9,7 @@ def test_request_with_retry_succeeds_after_502(monkeypatch):
     def flaky() -> str:
         calls["n"] += 1
         if calls["n"] < 3:
-            req = httpx.Request("POST", "http://example/v1/rerank")
+            req = httpx.Request("POST", "http://example/v1/chat/completions")
             resp = httpx.Response(502, request=req)
             raise httpx.HTTPStatusError("502", request=req, response=resp)
         return "ok"
@@ -21,7 +21,7 @@ def test_request_with_retry_succeeds_after_502(monkeypatch):
 
 def test_request_with_retry_gives_up(monkeypatch):
     def always_fail() -> str:
-        req = httpx.Request("POST", "http://example/v1/rerank")
+        req = httpx.Request("POST", "http://example/v1/chat/completions")
         resp = httpx.Response(502, request=req)
         raise httpx.HTTPStatusError("502", request=req, response=resp)
 

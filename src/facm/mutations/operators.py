@@ -4,6 +4,7 @@ import json
 import re
 
 from facm.clients.chat import ChatClient
+from facm.mutations.mining import DistractorMiner
 from facm.retrieval.corpus import Corpus
 from facm.schemas.models import (
     Chunk,
@@ -209,17 +210,36 @@ def generate_hard_negative(
     max_tokens: int,
     *,
     attempt: int = 1,
+    miner: DistractorMiner | None = None,
 ) -> Mutation | None:
     gold = corpus.get(seed.gold_chunk_id)
     style = gold.text[:500] if gold else ""
-    text = _llm_chunk(
-        chat,
-        prompt_id="hard_negative",
-        system=(
-            "You write Wikipedia-style passages for an IR hard-negative benchmark. "
-            'Return ONLY JSON: {"text": "..."}.'
-        ),
-        user=(
+    mined = miner.top_non_gold(seed, n=8) if miner is not None else []
+    if mined:
+        examples = miner.format_examples(mined[:5]) if miner else ""
+        focus = mined[(attempt - 1) % len(mined)]
+        prompt_id = "hard_negative"
+        user = (
+            f"Question: {seed.question}\n"
+            f"Gold answer (must NOT appear anywhere, including paraphrases): {seed.gold_answer}\n"
+            f"Gold passage style:\n{style}\n\n"
+            f"High-scoring non-answer distractors already retrieved for this query "
+            f"(compete with these in dense/sparse retrieval):\n{examples}\n\n"
+            f"Focus near-miss theme from distractor:\n{focus.text[:400]}\n\n"
+            "Write ONE hard-negative chunk (~80-150 words) that:\n"
+            "- Shares entities/phrases that make BM25 and dense retrievers rank it high\n"
+            "- Is a topical near-miss that does NOT answer the question\n"
+            "- Uses overlapping vocabulary with the question and the distractors above\n"
+            "- Never states or paraphrases the gold answer\n"
+            "- Sounds like natural Wikipedia prose"
+        )
+        system = (
+            "You write retrieval hard-negatives that transfer across sparse and dense "
+            'retrievers. Return ONLY JSON: {"text": "..."}.'
+        )
+    else:
+        prompt_id = "hard_negative"
+        user = (
             f"Question: {seed.question}\n"
             f"Gold answer (must NOT appear anywhere, including paraphrases): {seed.gold_answer}\n"
             f"Style reference:\n{style}\n\n"
@@ -228,7 +248,16 @@ def generate_hard_negative(
             "- Natural encyclopedic Wikipedia prose\n"
             "- Discuss related facts that do NOT answer the question\n"
             "- Do not mention the gold answer value at all"
-        ),
+        )
+        system = (
+            "You write Wikipedia-style passages for an IR hard-negative benchmark. "
+            'Return ONLY JSON: {"text": "..."}.'
+        )
+    text = _llm_chunk(
+        chat,
+        prompt_id=prompt_id,
+        system=system,
+        user=user,
         model=model,
         temperature=temperature,
         max_tokens=max_tokens,
@@ -249,10 +278,13 @@ def generate_hard_negative(
                 metadata={"role": "hard_negative", "page_title": "HardNegative"},
             )
         },
-        generator=GeneratorInfo(model=model, prompt_id="hard_negative", temperature=temperature),
+        generator=GeneratorInfo(model=model, prompt_id=prompt_id, temperature=temperature),
         question=seed.question,
         gold_answer=seed.gold_answer,
-        metadata={"attempt": attempt},
+        metadata={
+            "attempt": attempt,
+            "mined_distractor_ids": [c.chunk_id for c in mined[:5]],
+        },
     )
 
 
@@ -311,8 +343,25 @@ def generate_conflict(
 
 
 def _select_noise_chunks(
-    seed: CleanSeed, corpus: Corpus, n: int, *, offset: int = 0
+    seed: CleanSeed,
+    corpus: Corpus,
+    n: int,
+    *,
+    offset: int = 0,
+    miner: DistractorMiner | None = None,
 ) -> list[Chunk]:
+    if miner is not None:
+        pool = miner.top_non_gold(seed, n=max(n * 4, 20))
+        start = max(0, offset * n)
+        chosen = pool[start : start + n]
+        if len(chosen) < n:
+            for c in pool:
+                if c not in chosen:
+                    chosen.append(c)
+                if len(chosen) >= n:
+                    break
+        return chosen[:n]
+
     q_tokens = set(seed.question.lower().split())
     pool: list[Chunk] = []
     for c in corpus.all():
@@ -326,7 +375,6 @@ def _select_noise_chunks(
     start = max(0, offset * n)
     chosen = pool[start : start + n]
     if len(chosen) < n and start > 0:
-        # wrap / backfill from head for remaining slots
         for c in pool:
             if c in chosen:
                 continue
@@ -346,8 +394,11 @@ def generate_noise(
     max_tokens: int = 512,
     *,
     attempt: int = 1,
+    miner: DistractorMiner | None = None,
 ) -> Mutation | None:
-    chosen = _select_noise_chunks(seed, corpus, n, offset=attempt - 1)
+    chosen = _select_noise_chunks(
+        seed, corpus, n, offset=attempt - 1, miner=miner
+    )
     payloads: dict[str, ChunkPayload] = {}
     add_ids: list[str] = []
     for i, c in enumerate(chosen):
@@ -391,6 +442,41 @@ def generate_noise(
         )
     if not add_ids:
         return None
+    if chat is not None and miner is not None and len(add_ids) >= 1:
+        try:
+            examples = miner.format_examples(chosen[:3] or miner.top_non_gold(seed, n=3))
+            text = _llm_chunk(
+                chat,
+                prompt_id="noise",
+                system=(
+                    "You write dense/sparse-competitive distractor paragraphs. "
+                    'Return ONLY JSON: {"text": "..."}.'
+                ),
+                user=(
+                    f"Question: {seed.question}\n"
+                    f"Do NOT include the answer: {seed.gold_answer}\n"
+                    f"Competing retrieved distractors:\n{examples}\n\n"
+                    "Write one additional distractor (~80-120 words) that would "
+                    "plausibly rank in the top results for both BM25 and dense "
+                    "retrievers, without answering the question."
+                ),
+                model=model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            if not _contains_answer(text, seed.gold_answer):
+                cid = f"{seed.sample_id}_noise_t{attempt:02d}_llm"
+                add_ids.append(cid)
+                payloads[cid] = ChunkPayload(
+                    text=text,
+                    metadata={
+                        "role": "noise",
+                        "page_title": "Noise",
+                        "source": "llm",
+                    },
+                )
+        except Exception:
+            pass
     return Mutation(
         mutation_id=_mid(seed, "noise", attempt),
         sample_id=seed.sample_id,
@@ -406,7 +492,14 @@ def generate_noise(
         ),
         question=seed.question,
         gold_answer=seed.gold_answer,
-        metadata={"attempt": attempt},
+        metadata={
+            "attempt": attempt,
+            "source_chunk_ids": [
+                (payloads[cid].metadata or {}).get("source_chunk_id")
+                for cid in add_ids
+                if (payloads[cid].metadata or {}).get("source_chunk_id")
+            ],
+        },
     )
 
 
@@ -421,9 +514,9 @@ def generate_one_mutation(
     max_tokens: int,
     noise_add_count: int,
     attempt: int = 1,
+    miner: DistractorMiner | None = None,
 ) -> Mutation | None:
     """Generate a single (seed, failure[, attempt]) mutation."""
-    # Deterministic operators: only one useful attempt
     if failure in {"missing", "boundary"} and attempt > 1:
         return None
     temp = temperature
@@ -438,7 +531,14 @@ def generate_one_mutation(
             if chat is None:
                 return None
             return generate_hard_negative(
-                seed, corpus, chat, model, temp, max_tokens, attempt=attempt
+                seed,
+                corpus,
+                chat,
+                model,
+                temp,
+                max_tokens,
+                attempt=attempt,
+                miner=miner,
             )
         if failure == "conflict":
             if chat is None:
@@ -456,6 +556,7 @@ def generate_one_mutation(
                 temperature=temp,
                 max_tokens=max_tokens,
                 attempt=attempt,
+                miner=miner,
             )
     except Exception as exc:
         print(f"[mutate] {seed.sample_id}/{failure}/t{attempt} failed: {exc}")

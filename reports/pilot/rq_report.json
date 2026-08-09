@@ -1,244 +1,312 @@
 {
-  "rq1_semantic_success": {
+  "paper": "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation",
+  "scope": "Generate → Validate → Transfer",
+  "rq1_semantic_validity": {
     "boundary": {
-      "n": 96,
-      "semantic_success_rate": 1.0
+      "generated": 96,
+      "valid": 96,
+      "semantic_validity_rate": 1.0
     },
     "conflict": {
-      "n": 198,
-      "semantic_success_rate": 0.98989898989899
+      "generated": 198,
+      "valid": 196,
+      "semantic_validity_rate": 0.98989898989899
     },
     "hard_negative": {
-      "n": 193,
-      "semantic_success_rate": 0.9533678756476683
+      "generated": 770,
+      "valid": 751,
+      "semantic_validity_rate": 0.9753246753246754
     },
     "missing": {
-      "n": 200,
-      "semantic_success_rate": 1.0
+      "generated": 200,
+      "valid": 200,
+      "semantic_validity_rate": 1.0
     },
     "noise": {
-      "n": 200,
-      "semantic_success_rate": 1.0
+      "generated": 1200,
+      "valid": 1200,
+      "semantic_validity_rate": 1.0
     }
   },
-  "rq2_behavioral_success": {
-    "boundary": {
-      "n": 96,
-      "behavioral_success_rate": 0.875
+  "rq2_behavioral_effectiveness": {
+    "ber_by_failure": {
+      "boundary": {
+        "semantically_valid": 96,
+        "behaviorally_effective": 84,
+        "behavioral_effectiveness_rate": 0.875
+      },
+      "conflict": {
+        "semantically_valid": 196,
+        "behaviorally_effective": 193,
+        "behavioral_effectiveness_rate": 0.9846938775510204
+      },
+      "hard_negative": {
+        "semantically_valid": 751,
+        "behaviorally_effective": 724,
+        "behavioral_effectiveness_rate": 0.9640479360852197
+      },
+      "missing": {
+        "semantically_valid": 200,
+        "behaviorally_effective": 200,
+        "behavioral_effectiveness_rate": 1.0
+      },
+      "noise": {
+        "semantically_valid": 1200,
+        "behaviorally_effective": 1013,
+        "behavioral_effectiveness_rate": 0.8441666666666666
+      }
     },
-    "conflict": {
-      "n": 196,
-      "behavioral_success_rate": 0.9846938775510204
+    "paired_clean_to_mutated": {
+      "missing": {
+        "bm25": {
+          "n": 200,
+          "mean_delta_recall@5": 0.44,
+          "mean_delta_recall@20": 0.455,
+          "mean_delta_mrr": 0.37884890109890107,
+          "mean_gold_rank_delta": 9998.307692307691,
+          "top5_crossing_rate": 0.44,
+          "top20_crossing_rate": 0.455,
+          "mean_delta_ndcg@5": 0.39309554885370374
+        },
+        "bge_base": {
+          "n": 200,
+          "mean_delta_recall@5": 0.435,
+          "mean_delta_recall@20": 0.465,
+          "mean_delta_mrr": 0.3925631868131868,
+          "mean_gold_rank_delta": 9998.247311827958,
+          "top5_crossing_rate": 0.435,
+          "top20_crossing_rate": 0.465,
+          "mean_delta_ndcg@5": 0.4006638167725117
+        },
+        "hybrid": {
+          "n": 200,
+          "mean_delta_recall@5": 0.455,
+          "mean_delta_recall@20": 0.47,
+          "mean_delta_mrr": 0.4111388888888889,
+          "mean_gold_rank_delta": 9998.5,
+          "top5_crossing_rate": 0.455,
+          "top20_crossing_rate": 0.47,
+          "mean_delta_ndcg@5": 0.421318465540369
+        }
+      },
+      "hard_negative": {
+        "bm25": {
+          "n": 751,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.03505719757384205,
+          "mean_gold_rank_delta": 0.21142857142857144,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.02601785079352383
+        },
+        "bge_base": {
+          "n": 751,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.07981177721523926,
+          "mean_gold_rank_delta": 0.4943820224719101,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.05916005267537319
+        },
+        "hybrid": {
+          "n": 751,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.041162417993310135,
+          "mean_gold_rank_delta": 0.28055555555555556,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.030705388263939416
+        }
+      },
+      "noise": {
+        "bm25": {
+          "n": 1200,
+          "mean_delta_recall@5": 0.011666666666666667,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.013376808072531757,
+          "mean_gold_rank_delta": 0.3443223443223443,
+          "top5_crossing_rate": 0.011666666666666667,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.014020050764166543
+        },
+        "bge_base": {
+          "n": 1200,
+          "mean_delta_recall@5": 0.0025,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.05382914736407384,
+          "mean_gold_rank_delta": 0.4121863799283154,
+          "top5_crossing_rate": 0.0025,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.04067255827817147
+        },
+        "hybrid": {
+          "n": 1200,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.020505161505161507,
+          "mean_gold_rank_delta": 0.17907801418439717,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.01534511154188521
+        }
+      },
+      "conflict": {
+        "bm25": {
+          "n": 196,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.0570578231292517,
+          "mean_gold_rank_delta": 0.33707865168539325,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.0425085281830901
+        },
+        "bge_base": {
+          "n": 196,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.13125677468789715,
+          "mean_gold_rank_delta": 0.7472527472527473,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.09713430075533776
+        },
+        "hybrid": {
+          "n": 196,
+          "mean_delta_recall@5": 0.0,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.08241599670171099,
+          "mean_gold_rank_delta": 0.4891304347826087,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.06135708298930558
+        }
+      },
+      "boundary": {
+        "bm25": {
+          "n": 96,
+          "mean_delta_recall@5": 0.34375,
+          "mean_delta_recall@20": 0.2604166666666667,
+          "mean_delta_mrr": -0.013451363451363453,
+          "mean_gold_rank_delta": 219.53846153846155,
+          "top5_crossing_rate": 0.020833333333333332,
+          "top20_crossing_rate": 0.020833333333333332,
+          "mean_delta_ndcg@5": 0.23527338831684252
+        },
+        "bge_base": {
+          "n": 96,
+          "mean_delta_recall@5": 0.11458333333333333,
+          "mean_delta_recall@20": 0.09895833333333333,
+          "mean_delta_mrr": -0.09917391636141637,
+          "mean_gold_rank_delta": 106.9247311827957,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.010416666666666666,
+          "mean_delta_ndcg@5": 0.06674909089814206
+        },
+        "hybrid": {
+          "n": 96,
+          "mean_delta_recall@5": 0.2760416666666667,
+          "mean_delta_recall@20": 0.13541666666666666,
+          "mean_delta_mrr": -0.004589266262060379,
+          "mean_gold_rank_delta": 0.05319148936170213,
+          "top5_crossing_rate": 0.020833333333333332,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.20662433510957137
+        }
+      }
     },
-    "hard_negative": {
-      "n": 184,
-      "behavioral_success_rate": 0.8641304347826086
-    },
-    "missing": {
-      "n": 200,
-      "behavioral_success_rate": 1.0
-    },
-    "noise": {
-      "n": 200,
-      "behavioral_success_rate": 0.37
-    }
+    "note": "BER = behaviorally_effective / semantically_valid. Paired metrics use construction retrievers (BM25, BGE, Hybrid) only."
   },
-  "rq3_held_out_generalization": {
-    "missing": {
-      "e5_large": {
-        "n": 200,
-        "challenge_rate": 0.475,
-        "mean_delta_mrr": 0.42291287878787875,
-        "mean_delta_recall@5": 0.465
+  "rq3_transferability": {
+    "held_out_by_failure": {
+      "missing": {
+        "e5_large": {
+          "n": 200,
+          "challenge_rate": 0.475,
+          "mean_delta_mrr": 0.42291287878787875,
+          "mean_delta_recall@5": 0.465
+        },
+        "gte_large": {
+          "n": 200,
+          "challenge_rate": 0.46,
+          "mean_delta_mrr": 0.3635952380952381,
+          "mean_delta_recall@5": 0.43
+        }
       },
-      "gte_large": {
-        "n": 200,
-        "challenge_rate": 0.46,
-        "mean_delta_mrr": 0.3635952380952381,
-        "mean_delta_recall@5": 0.43
+      "hard_negative": {
+        "e5_large": {
+          "n": 724,
+          "challenge_rate": 0.2361878453038674,
+          "mean_delta_mrr": 0.08872949104302695,
+          "mean_delta_recall@5": 0.004143646408839779
+        },
+        "gte_large": {
+          "n": 724,
+          "challenge_rate": 0.28314917127071826,
+          "mean_delta_mrr": 0.09384215577240439,
+          "mean_delta_recall@5": 0.013812154696132596
+        }
+      },
+      "noise": {
+        "e5_large": {
+          "n": 1013,
+          "challenge_rate": 0.16386969397828233,
+          "mean_delta_mrr": 0.05605351925687563,
+          "mean_delta_recall@5": 0.005923000987166831
+        },
+        "gte_large": {
+          "n": 1013,
+          "challenge_rate": 0.2349457058242843,
+          "mean_delta_mrr": 0.07129041436790697,
+          "mean_delta_recall@5": 0.02171767028627838
+        }
+      },
+      "conflict": {
+        "e5_large": {
+          "n": 193,
+          "challenge_rate": 0.34196891191709844,
+          "mean_delta_mrr": 0.14359527921704088,
+          "mean_delta_recall@5": 0.0051813471502590676
+        },
+        "gte_large": {
+          "n": 193,
+          "challenge_rate": 0.35751295336787564,
+          "mean_delta_mrr": 0.12610103626943003,
+          "mean_delta_recall@5": 0.015544041450777202
+        }
+      },
+      "boundary": {
+        "e5_large": {
+          "n": 84,
+          "challenge_rate": 0.4166666666666667,
+          "mean_delta_mrr": -0.06398809523809523,
+          "mean_delta_recall@5": 0.19047619047619047
+        },
+        "gte_large": {
+          "n": 84,
+          "challenge_rate": 0.35714285714285715,
+          "mean_delta_mrr": -0.17001133786848074,
+          "mean_delta_recall@5": 0.11904761904761904
+        }
       }
     },
-    "hard_negative": {
-      "e5_large": {
-        "n": 159,
-        "challenge_rate": 0.08176100628930817,
-        "mean_delta_mrr": 0.02545422781271838,
-        "mean_delta_recall@5": 0.006289308176100629
+    "ablation_validation_filters": {
+      "raw_mutations": {
+        "n_mutations": 2464,
+        "held_out_challenge_rate": 0.25020292207792205
       },
-      "gte_large": {
-        "n": 159,
-        "challenge_rate": 0.16352201257861634,
-        "mean_delta_mrr": 0.049494609164420486,
-        "mean_delta_recall@5": 0.0
+      "plus_semantic": {
+        "n_mutations": 2443,
+        "held_out_challenge_rate": 0.2503069995906672
+      },
+      "plus_semantic_behavioral": {
+        "n_mutations": 2214,
+        "held_out_challenge_rate": 0.26355013550135503
       }
     },
-    "conflict": {
-      "e5_large": {
-        "n": 193,
-        "challenge_rate": 0.3471502590673575,
-        "mean_delta_mrr": 0.14575417386298214,
-        "mean_delta_recall@5": 0.0051813471502590676
-      },
-      "gte_large": {
-        "n": 193,
-        "challenge_rate": 0.37305699481865284,
-        "mean_delta_mrr": 0.13305660229235358,
-        "mean_delta_recall@5": 0.015544041450777202
-      }
-    },
-    "boundary": {
-      "e5_large": {
-        "n": 84,
-        "challenge_rate": 0.4166666666666667,
-        "mean_delta_mrr": -0.06398809523809523,
-        "mean_delta_recall@5": 0.19047619047619047
-      },
-      "gte_large": {
-        "n": 84,
-        "challenge_rate": 0.35714285714285715,
-        "mean_delta_mrr": -0.17001133786848074,
-        "mean_delta_recall@5": 0.11904761904761904
-      }
-    },
-    "noise": {
-      "e5_large": {
-        "n": 74,
-        "challenge_rate": 0.05405405405405406,
-        "mean_delta_mrr": 0.007207207207207208,
-        "mean_delta_recall@5": 0.013513513513513514
-      },
-      "gte_large": {
-        "n": 74,
-        "challenge_rate": 0.0945945945945946,
-        "mean_delta_mrr": 0.008220720720720722,
-        "mean_delta_recall@5": 0.0
-      }
-    }
-  },
-  "rq4_reranker_recovery": {
-    "missing": {
-      "none": {
-        "n": 94,
-        "mean_recovery_mrr": 0.0
-      },
-      "cross-encoder/ms-marco-MiniLM-L6-v2": {
-        "n": 94,
-        "mean_recovery_mrr": 0.0
-      },
-      "jinaai/jina-reranker-v2-base-multilingual": {
-        "n": 94,
-        "mean_recovery_mrr": 0.0
-      },
-      "mixedbread-ai/mxbai-rerank-large-v1": {
-        "n": 94,
-        "mean_recovery_mrr": 0.0
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "n": 94,
-        "mean_recovery_mrr": 0.0
-      }
-    },
-    "conflict": {
-      "none": {
-        "n": 32,
-        "mean_recovery_mrr": -0.4375000000000002
-      },
-      "cross-encoder/ms-marco-MiniLM-L6-v2": {
-        "n": 32,
-        "mean_recovery_mrr": 1.643229166666667
-      },
-      "jinaai/jina-reranker-v2-base-multilingual": {
-        "n": 32,
-        "mean_recovery_mrr": 5.299479166666668
-      },
-      "mixedbread-ai/mxbai-rerank-large-v1": {
-        "n": 32,
-        "mean_recovery_mrr": 2.2369791666666674
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "n": 32,
-        "mean_recovery_mrr": 2.531250000000001
-      }
-    },
-    "noise": {
-      "none": {
-        "n": 6,
-        "mean_recovery_mrr": -3.166666666666668
-      },
-      "cross-encoder/ms-marco-MiniLM-L6-v2": {
-        "n": 6,
-        "mean_recovery_mrr": 15.666666666666671
-      },
-      "jinaai/jina-reranker-v2-base-multilingual": {
-        "n": 6,
-        "mean_recovery_mrr": 32.33333333333334
-      },
-      "mixedbread-ai/mxbai-rerank-large-v1": {
-        "n": 6,
-        "mean_recovery_mrr": 20.77777777777779
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "n": 6,
-        "mean_recovery_mrr": 33.66666666666668
-      }
-    },
-    "boundary": {
-      "none": {
-        "n": 11,
-        "mean_recovery_mrr": -0.028409090909090908
-      },
-      "cross-encoder/ms-marco-MiniLM-L6-v2": {
-        "n": 11,
-        "mean_recovery_mrr": 0.9744318181818182
-      },
-      "jinaai/jina-reranker-v2-base-multilingual": {
-        "n": 11,
-        "mean_recovery_mrr": 0.90625
-      },
-      "mixedbread-ai/mxbai-rerank-large-v1": {
-        "n": 11,
-        "mean_recovery_mrr": 0.571969696969697
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "n": 11,
-        "mean_recovery_mrr": 0.9744318181818182
-      }
-    },
-    "hard_negative": {
-      "none": {
-        "n": 9,
-        "mean_recovery_mrr": -1.1111111111111107
-      },
-      "cross-encoder/ms-marco-MiniLM-L6-v2": {
-        "n": 9,
-        "mean_recovery_mrr": 12.44444444444444
-      },
-      "jinaai/jina-reranker-v2-base-multilingual": {
-        "n": 9,
-        "mean_recovery_mrr": 12.777777777777773
-      },
-      "mixedbread-ai/mxbai-rerank-large-v1": {
-        "n": 9,
-        "mean_recovery_mrr": 12.777777777777773
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "n": 9,
-        "mean_recovery_mrr": 13.55555555555555
-      }
-    }
-  },
-  "ablation_validation_filters": {
-    "raw_llm": {
-      "n_mutations": 887,
-      "held_out_challenge_rate": 0.25535512965050733
-    },
-    "plus_semantic": {
-      "n_mutations": 876,
-      "held_out_challenge_rate": 0.2574200913242009
-    },
-    "plus_semantic_behavioral": {
-      "n_mutations": 710,
-      "held_out_challenge_rate": 0.3105633802816901
-    }
+    "note": "Held-out = E5-large + GTE-large; never used for mutation acceptance. Challenge = ΔMRR>0 or Recall@5 drops vs clean."
   }
 }

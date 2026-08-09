@@ -5,6 +5,7 @@ from pathlib import Path
 
 from facm.config import load_config
 from facm.pipeline import (
+    rebuild_report,
     run_pipeline,
     stage0_clean_baseline,
     stage1_mutate,
@@ -17,7 +18,10 @@ from facm.pipeline import (
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="facm",
-        description="Failure-aware Corpus Mutation for Retrieval and Reranking Evaluation",
+        description=(
+            "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation "
+            "(Generate → Validate → Transfer)"
+        ),
     )
     parser.add_argument(
         "-c",
@@ -27,9 +31,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_all = sub.add_parser("run", help="Run Stage 0–4 end-to-end")
+    p_all = sub.add_parser("run", help="Run Stage 0–4 (Generate → Validate → Transfer)")
     p_all.add_argument("--skip-llm", action="store_true")
-    p_all.add_argument("--skip-rerank", action="store_true")
 
     sub.add_parser("stage0", help="Clean baseline retrieval")
     p1 = sub.add_parser("mutate", help="Stage 1 mutation generation")
@@ -37,14 +40,17 @@ def main(argv: list[str] | None = None) -> int:
     p2 = sub.add_parser("validate-semantic", help="Stage 2 semantic validation")
     p2.add_argument("--skip-llm", action="store_true")
     sub.add_parser("validate-behavior", help="Stage 3 behavioral validation")
-    p4 = sub.add_parser("benchmark", help="Stage 4 held-out + rerank")
-    p4.add_argument("--skip-rerank", action="store_true")
+    sub.add_parser("benchmark", help="Stage 4 held-out transfer + RQ report")
+    sub.add_parser(
+        "rebuild-report",
+        help="Rebuild RQ1–RQ3 report from existing stage JSONL",
+    )
 
     args = parser.parse_args(argv)
     cfg = load_config(Path(args.config))
 
     if args.cmd == "run":
-        run_pipeline(cfg, skip_llm=args.skip_llm, skip_rerank=args.skip_rerank)
+        run_pipeline(cfg, skip_llm=args.skip_llm)
     elif args.cmd == "stage0":
         stage0_clean_baseline(cfg)
     elif args.cmd == "mutate":
@@ -54,7 +60,9 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "validate-behavior":
         stage3_behavioral(cfg)
     elif args.cmd == "benchmark":
-        stage4_benchmark(cfg, run_rerank=not args.skip_rerank)
+        stage4_benchmark(cfg)
+    elif args.cmd == "rebuild-report":
+        rebuild_report(cfg)
     else:
         parser.error(f"unknown command {args.cmd}")
         return 2

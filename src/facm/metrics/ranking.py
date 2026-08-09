@@ -60,10 +60,24 @@ def rank_of(ranked_ids: Sequence[str], chunk_id: str) -> int | None:
 
 
 def recovery_rate(clean: float, mutated: float, recovered: float) -> float | None:
+    """Fraction of (clean − mutated) closed by a post score (utility helper)."""
     denom = clean - mutated
     if denom <= 1e-12:
         return None
     return (recovered - mutated) / denom
+
+
+def pool_recovery_rate(
+    pre: float,
+    post: float,
+    *,
+    ceiling: float = 1.0,
+) -> float | None:
+    """Fraction of remaining gap to ``ceiling`` closed: ``(post - pre) / (ceiling - pre)``."""
+    denom = ceiling - pre
+    if denom <= 1e-12:
+        return None
+    return (post - pre) / denom
 
 
 def compute_ranking_metrics(
