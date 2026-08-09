@@ -43,7 +43,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("benchmark", help="Stage 4 held-out transfer + RQ report")
     sub.add_parser(
         "rebuild-report",
-        help="Rebuild RQ1–RQ3 report from existing stage JSONL",
+        help=(
+            "Recompute behavioral acceptance + RQ report from saved "
+            "clean/mutated rankings (no LLM / no re-retrieval)"
+        ),
     )
 
     args = parser.parse_args(argv)

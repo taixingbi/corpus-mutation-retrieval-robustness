@@ -12,33 +12,31 @@ See [PAPER.md](PAPER.md) for the locked design.
 
 | Stage | Output | RQ |
 |-------|--------|-----|
-| 0 Clean baseline | `1_clean/retrieval_result.jsonl` | — |
+| 0 Clean | `1_clean/retrieval_result.jsonl` | — |
 | 1 Mutate | `2_mutations/mutation.jsonl` | one `(seed, failure)` (+ optional Random HN) |
 | 2 Semantic | `3_semantic/mutation_passed.jsonl` | **RQ1** SVR |
-| 3 Behavioral | `4_behavior/mutation_accepted.jsonl` | **RQ2** BER (BM25 / BGE / Hybrid only) |
-| 4 Held-out transfer | `5_benchmark/*` + `reports/<run>/rq_report.json` | **RQ3** E5 / GTE + ablation |
+| 3 Behavioral | `4_behavior/mutation_accepted.jsonl` | **RQ2** BER (BM25 / BGE / Hybrid) |
+| 4 Held-out | `5_benchmark/*` + `reports/<run>/rq_report.json` | **RQ3** E5 / GTE + ablation |
 
-E5-large and GTE-large are **held-out**: never used for mutation acceptance.
+Held-out: **E5-large**, **GTE-large** (never used for acceptance).
 
 ## Research questions
 
-1. **RQ1 Validity** — Semantic Validity Rate (SVR) + human audit (30–50 / failure)  
-2. **RQ2 Effectiveness** — Behavioral Effectiveness Rate (BER); paired Clean→Mutated metrics  
-3. **RQ3 Transferability** — Held-out challenge rate; Raw → +Semantic → +Behavioral; Random vs LLM HN  
+1. **RQ1** — Semantic Validity Rate (SVR) + human audit  
+2. **RQ2** — Behavioral Effectiveness Rate (BER); paired Clean→Mutated metrics  
+3. **RQ3** — Held-out transfer; Raw → +Semantic → +Behavioral; Random vs LLM HN  
+
+Missing is a **deterministic negative control** (excluded from BER).
 
 ## Setup
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env
-# FACM_INFERENCE_URL for LLM mutate/judge (see example_inference.md)
-# Model inventory: model.md
+cp .env.example .env   # FACM_INFERENCE_* — see example_inference.md, model.md
 ```
 
-## Data (RAGFailBench)
-
-Merge unique clean seeds across stability runs (~531 max available locally):
+## Data
 
 ```bash
 python scripts/ingest_ragfailbench.py \
@@ -48,56 +46,45 @@ python scripts/ingest_ragfailbench.py \
   --seeds-runs pilot_stability_s42,pilot_stability_s123,pilot_stability_s2026,pilot_v1
 ```
 
-Pilot (200 seeds) remains at `data/runs/pilot/0_base`. Reaching **1000** seeds requires generating more seeds in RAGFailBench (Paper 2).
+~531 unique seeds available by merging RAGFailBench runs. 1000 seeds needs more Paper-2 seed generation.
 
 ## Run
 
 ```bash
-# Main experiment (~531 seeds, Random HN baseline on)
+# Full main experiment
 facm -c configs/main.yaml run
 
-# Rebuild RQ1–3 from existing JSONL
+# Recompute behavior + RQ report from saved rankings (no LLM / no re-retrieval)
 facm -c configs/main.yaml rebuild-report
 
 # Human semantic audit sample
-python scripts/export_semantic_audit.py \
-  --mutations data/runs/main/3_semantic/mutation.jsonl \
-  --out reports/audit/semantic_audit_sample.jsonl \
-  --per-failure 50
+python scripts/export_semantic_audit.py --per-failure 50
 ```
 
 Pilot archive: `facm -c configs/pilot.yaml run`  
 Smoke: `facm -c configs/smoke.yaml run --skip-llm`
 
-## Mutations (one failure per corpus state)
+## Mutations
 
 | Failure | Operation | Generation |
 |---------|-----------|------------|
-| Missing | remove gold | Rule |
-| Hard Negative | add wrong-but-plausible same-entity/relation | LLM (+ BM25 cues) |
-| Hard Negative (baseline) | add related corpus chunk | Random BM25 (no LLM) |
-| Conflict | add contradiction | LLM |
-| Boundary | split gold evidence | Rule |
-| Noise | add distractors | Corpus/LLM + BM25 mine |
+| Missing | remove gold | Rule (negative control) |
+| Hard Negative | same entity/relation, wrong plausible fact | LLM |
+| Hard Negative (baseline) | related corpus chunk | Random BM25 |
+| Conflict | contradiction | LLM |
+| Boundary | split gold → pieces A/B | Rule |
+| Noise | distractors | Corpus/LLM + BM25 mine |
 
-Noise is intentionally left as-is: semantically easy, behaviorally hard (paper finding).
+Behavioral criteria are **failure-specific** (e.g. HN outrank / Top-5 cross / ΔMRR≥0.10; Noise needs Top-5 entry + meaningful gold drop).
 
-## Schemas
-
-Reused from [RAGFailBench](https://github.com/taixingbi/RAGFailBench): `Chunk.json`, `CleanSeed.json`.  
-
-New: `Mutation.json`, `BehaviorValidation.json`, `RetrievalResult.json`.
-
-## Config knobs
+## Config
 
 ```yaml
 llm_concurrency: 8
 embed_concurrency: 1
 embed_batch_size: 128
 include_random_hn_baseline: true
-mutation_oversample:   # main: 1 per failure
-  hard_negative: 1
-  noise: 1
+mutation_oversample: { missing: 1, hard_negative: 1, conflict: 1, boundary: 1, noise: 1 }
 ```
 
 Embeddings cache: `{output_dir}/_embed_cache/`.

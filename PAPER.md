@@ -18,7 +18,9 @@ Reranker recovery, generator EM/F1, cost, and latency are **out of scope**.
 | **RQ2 Effectiveness** | Do they induce retrieval failures? | BER, Recall@5/20, MRR, Gold Rank Δ, Top-k crossing |
 | **RQ3 Transferability** | Transfer to unseen retrievers? | Held-out ΔMRR / ΔRecall@5 / Challenge Rate |
 
-**Ablation (RQ3):** Raw → +Semantic → +Semantic+Behavioral on held-out challenge rate.
+**Ablation (RQ3):** Raw → +Semantic → +Semantic+Behavioral on held-out challenge rate (bootstrap 95% CI).
+
+**Behavioral validation (locked):** failure-specific meaningful effects (HN outrank / Top-5 cross / ΔMRR≥0.10; Conflict in Top-5 + effect; Noise Top-5 + Δrank≥3 or Top-5 cross; Boundary uses split relevance). Missing is a **deterministic negative control** (excluded from BER).
 
 **Baseline (RQ3):** Random HN (BM25-related corpus chunk, no LLM) vs LLM HN under the same filters.
 

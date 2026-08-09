@@ -115,8 +115,7 @@ def stage0_clean_baseline(
         seeds, _one, max_concurrency=cfg.llm_concurrency, desc="stage0-clean"
     )
     out = [r for rows in nested for r in rows]
-    path = cfg.output_path / "1_clean" / "retrieval_result.jsonl"
-    write_jsonl(path, out)
+    write_jsonl(cfg.output_path / "1_clean" / "retrieval_result.jsonl", out)
     return out
 
 
@@ -220,10 +219,10 @@ def stage3_behavioral(
     seeds = {s.sample_id: s for s in load_seeds(cfg.base_path / "clean_seeds.jsonl")}
     mutations = load_models(cfg.output_path / "3_semantic" / "mutation_passed.jsonl", Mutation)
 
-    def _one(mutation: Mutation) -> tuple[list[BehaviorValidation], Mutation | None]:
+    def _one(mutation: Mutation) -> tuple[list[BehaviorValidation], Mutation | None, dict]:
         seed = seeds.get(mutation.sample_id)
         if seed is None:
-            return [], None
+            return [], None, {}
         _, mut_retrievers = apply_mutation_retrievers(
             clean_retrievers, corpus, mutation, rrf_k=cfg.rrf_k
         )
@@ -240,21 +239,38 @@ def stage3_behavioral(
                     top_k=cfg.top_k,
                 )
             )
-        ok, _ = aggregate_acceptance(per_ret, majority=cfg.behavioral_majority)
-        return per_ret, mutation if ok else None
+        ok, _, reason = aggregate_acceptance(per_ret, majority=cfg.behavioral_majority)
+        pass_map = {r.retriever: bool(r.accepted_for_retriever) for r in per_ret}
+        summary = {
+            "sample_id": mutation.sample_id,
+            "mutation_id": mutation.mutation_id,
+            "failure": mutation.failure,
+            "bm25_pass": pass_map.get("bm25", False),
+            "dense_pass": pass_map.get("bge_base", False),
+            "hybrid_pass": pass_map.get("hybrid", False),
+            "accepted": ok,
+            "reason": reason,
+            "baseline": (mutation.metadata or {}).get("baseline"),
+        }
+        return per_ret, mutation if ok else None, summary
 
     results = map_concurrent(
         mutations, _one, max_concurrency=cfg.llm_concurrency, desc="stage3-behavior"
     )
     rows: list[BehaviorValidation] = []
     accepted_mutations: list[Mutation] = []
-    for per_ret, accepted in results:
+    summaries: list[dict] = []
+    for per_ret, accepted, summary in results:
         rows.extend(per_ret)
+        if summary:
+            summaries.append(summary)
         if accepted is not None:
             accepted_mutations.append(accepted)
 
-    write_jsonl(cfg.output_path / "4_behavior" / "behavior_validation.jsonl", rows)
-    write_jsonl(cfg.output_path / "4_behavior" / "mutation_accepted.jsonl", accepted_mutations)
+    out_dir = cfg.output_path / "4_behavior"
+    write_jsonl(out_dir / "behavior_validation.jsonl", rows)
+    write_jsonl(out_dir / "behavior_summary.jsonl", summaries)
+    write_jsonl(out_dir / "mutation_accepted.jsonl", accepted_mutations)
     return rows
 
 
@@ -276,7 +292,8 @@ def stage4_benchmark(
     )
     raw = load_models(cfg.output_path / "2_mutations" / "mutation.jsonl", Mutation)
     sem = load_models(cfg.output_path / "3_semantic" / "mutation_passed.jsonl", Mutation)
-    beh = load_models(cfg.output_path / "4_behavior" / "mutation_accepted.jsonl", Mutation)
+    beh_path = cfg.output_path / "4_behavior" / "mutation_accepted.jsonl"
+    beh = load_models(beh_path, Mutation) if beh_path.exists() else []
 
     by_id = {m.mutation_id: m for m in raw}
     for m in sem + beh:
@@ -318,41 +335,92 @@ def stage4_benchmark(
         retrieval_out.extend(rows)
 
     write_jsonl(cfg.output_path / "5_benchmark" / "retrieval_result.jsonl", retrieval_out)
-    report = _build_report_from_paths(cfg, retrieval_out)
-    write_report(Path("reports") / cfg.run_id / "rq_report.json", report)
-    write_report(cfg.output_path / "5_benchmark" / "rq_report.json", report)
-
-
-def _build_report_from_paths(
-    cfg: AppConfig,
-    retrieval: list[RetrievalResult] | list[dict] | None = None,
-) -> dict:
-    mut_path = cfg.output_path / "3_semantic" / "mutation.jsonl"
-    if not mut_path.exists():
-        mut_path = cfg.output_path / "2_mutations" / "mutation.jsonl"
-    beh_path = cfg.output_path / "4_behavior" / "behavior_validation.jsonl"
-    ret_path = cfg.output_path / "5_benchmark" / "retrieval_result.jsonl"
-    if retrieval is None:
-        ret_rows = list(read_jsonl(ret_path)) if ret_path.exists() else []
-    else:
-        ret_rows = [
-            r.model_dump(mode="json") if hasattr(r, "model_dump") else r for r in retrieval
-        ]
-    return build_rq_report(
-        mutations=list(read_jsonl(mut_path)) if mut_path.exists() else [],
-        behavior=list(read_jsonl(beh_path)) if beh_path.exists() else [],
-        retrieval=ret_rows,
-    )
+    rebuild_report(cfg)
 
 
 def rebuild_report(cfg: AppConfig) -> Path:
-    """Rebuild RQ1–RQ3 from existing stage JSONL outputs."""
-    report = _build_report_from_paths(cfg)
-    out = Path("reports") / cfg.run_id / "rq_report.json"
-    write_report(out, report)
+    """Recompute behavioral acceptance + RQ report from saved rankings (no LLM/retrieval)."""
+    mut_path = cfg.output_path / "3_semantic" / "mutation.jsonl"
+    if not mut_path.exists():
+        mut_path = cfg.output_path / "2_mutations" / "mutation.jsonl"
+    ret_path = cfg.output_path / "5_benchmark" / "retrieval_result.jsonl"
+    if not mut_path.exists():
+        raise FileNotFoundError(mut_path)
+    if not ret_path.exists():
+        raise FileNotFoundError(ret_path)
+
+    mutations = load_models(mut_path, Mutation)
+    retrieval = list(read_jsonl(ret_path))
+
+    clean_idx: dict[tuple[str, str], list[str]] = {}
+    mut_idx: dict[tuple[str, str], list[str]] = {}
+    for r in retrieval:
+        if r.get("stage") == "clean":
+            clean_idx[(r["sample_id"], r["retriever"])] = list(r.get("ranked_ids") or [])
+        elif r.get("stage") == "mutated" and r.get("mutation_id"):
+            mut_idx[(r["mutation_id"], r["retriever"])] = list(r.get("ranked_ids") or [])
+
+    rows: list[BehaviorValidation] = []
+    summaries: list[dict] = []
+    accepted_mutations: list[Mutation] = []
+
+    for mutation in mutations:
+        per: list[BehaviorValidation] = []
+        for name in cfg.construction_retrievers:
+            clean_ranked = clean_idx.get((mutation.sample_id, name))
+            mut_ranked = mut_idx.get((mutation.mutation_id, name))
+            if clean_ranked is None or mut_ranked is None:
+                continue
+            per.append(
+                validate_behavior_for_retriever(
+                    mutation,
+                    retriever_name=name,
+                    clean_ranked=clean_ranked,
+                    mutated_ranked=mut_ranked,
+                    top_k=cfg.top_k,
+                )
+            )
+        if not per:
+            continue
+        ok, _, reason = aggregate_acceptance(per, majority=cfg.behavioral_majority)
+        rows.extend(per)
+        pass_map = {r.retriever: bool(r.accepted_for_retriever) for r in per}
+        summaries.append(
+            {
+                "sample_id": mutation.sample_id,
+                "mutation_id": mutation.mutation_id,
+                "failure": mutation.failure,
+                "bm25_pass": pass_map.get("bm25", False),
+                "dense_pass": pass_map.get("bge_base", False),
+                "hybrid_pass": pass_map.get("hybrid", False),
+                "accepted": ok,
+                "reason": reason,
+                "baseline": (mutation.metadata or {}).get("baseline"),
+            }
+        )
+        if ok:
+            accepted_mutations.append(mutation)
+
+    out_dir = cfg.output_path / "4_behavior"
+    write_jsonl(out_dir / "behavior_validation.jsonl", rows)
+    write_jsonl(out_dir / "behavior_summary.jsonl", summaries)
+    write_jsonl(out_dir / "mutation_accepted.jsonl", accepted_mutations)
+
+    n_acc = sum(1 for s in summaries if s["accepted"])
+    print(f"[rebuild] {len(summaries)} mutations scored; {n_acc} accepted")
+
+    report = build_rq_report(
+        mutations=[m.model_dump(mode="json") for m in mutations],
+        behavior_summary=summaries,
+        retrieval=retrieval,
+        n_boot=1000,
+        bootstrap_seed=0,
+    )
+    report_path = Path("reports") / cfg.run_id / "rq_report.json"
+    write_report(report_path, report)
     write_report(cfg.output_path / "5_benchmark" / "rq_report.json", report)
-    print(f"[rebuild] wrote {out}")
-    return out
+    print(f"[rebuild] wrote {report_path}")
+    return report_path
 
 
 def run_pipeline(cfg: AppConfig, *, skip_llm: bool = False) -> None:

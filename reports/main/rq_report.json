@@ -1,6 +1,7 @@
 {
   "paper": "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation",
   "scope": "Generate → Validate → Transfer",
+  "validator": "failure_specific",
   "finding": "Behavioral validation—not semantic validation alone—is the key step for constructing robust retrieval evaluation benchmarks.",
   "rq1_semantic_validity": {
     "boundary": {
@@ -33,312 +34,1222 @@
     "ber_by_failure": {
       "boundary": {
         "semantically_valid": 251,
-        "behaviorally_effective": 218,
-        "behavioral_effectiveness_rate": 0.8685258964143426
+        "behaviorally_effective": 137,
+        "behavioral_effectiveness_rate": 0.545816733067729
       },
       "conflict": {
         "semantically_valid": 523,
-        "behaviorally_effective": 516,
-        "behavioral_effectiveness_rate": 0.9866156787762906
+        "behaviorally_effective": 354,
+        "behavioral_effectiveness_rate": 0.6768642447418738
       },
       "hard_negative": {
         "semantically_valid": 454,
-        "behaviorally_effective": 450,
-        "behavioral_effectiveness_rate": 0.9911894273127754
-      },
-      "missing": {
-        "semantically_valid": 531,
-        "behaviorally_effective": 531,
-        "behavioral_effectiveness_rate": 1.0
+        "behaviorally_effective": 351,
+        "behavioral_effectiveness_rate": 0.7731277533039648
       },
       "noise": {
         "semantically_valid": 531,
-        "behaviorally_effective": 521,
-        "behavioral_effectiveness_rate": 0.9811676082862524
+        "behaviorally_effective": 5,
+        "behavioral_effectiveness_rate": 0.009416195856873822
       }
     },
+    "missing_negative_control": {
+      "operation": "remove_gold",
+      "role": "deterministic_negative_control",
+      "generated": 531,
+      "semantic_valid": 531,
+      "operation_success_rate": 1.0,
+      "note": "Excluded from BER; gold removal is guaranteed by construction."
+    },
     "paired_clean_to_mutated": {
-      "missing": {
-        "bm25": {
-          "n": 531,
-          "mean_delta_recall@5": 0.423728813559322,
-          "mean_delta_recall@20": 0.4444444444444444,
-          "mean_delta_mrr": 0.36840442104343385,
-          "mean_gold_rank_delta": 9998.093220338984,
-          "top5_crossing_rate": 0.423728813559322,
-          "top20_crossing_rate": 0.4444444444444444,
-          "mean_delta_ndcg@5": 0.38081831761147106
-        },
-        "bge_base": {
-          "n": 531,
-          "mean_delta_recall@5": 0.4350282485875706,
-          "mean_delta_recall@20": 0.4651600753295669,
-          "mean_delta_mrr": 0.3930800854083637,
-          "mean_gold_rank_delta": 9998.165991902833,
-          "top5_crossing_rate": 0.4350282485875706,
-          "top20_crossing_rate": 0.4651600753295669,
-          "mean_delta_ndcg@5": 0.40125967568971643
-        },
-        "hybrid": {
-          "n": 531,
-          "mean_delta_recall@5": 0.4444444444444444,
-          "mean_delta_recall@20": 0.4613935969868173,
-          "mean_delta_mrr": 0.4011905441283972,
-          "mean_gold_rank_delta": 9998.457142857143,
-          "top5_crossing_rate": 0.4444444444444444,
-          "top20_crossing_rate": 0.4613935969868173,
-          "mean_delta_ndcg@5": 0.41090791038517727
-        }
-      },
       "hard_negative": {
         "bm25": {
           "n": 454,
-          "mean_delta_recall@5": 0.00881057268722467,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.06210539531313934,
-          "mean_gold_rank_delta": 0.43455497382198954,
-          "top5_crossing_rate": 0.00881057268722467,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.04932661037369659
+          "clean_mrr": {
+            "n": 454,
+            "mean": 0.3430567127182012,
+            "ci_low": 0.3045764114128652,
+            "ci_high": 0.38333268486221767
+          },
+          "mutated_mrr": {
+            "n": 454,
+            "mean": 0.2809513174050619,
+            "ci_low": 0.24681184087571753,
+            "ci_high": 0.3165025714006991
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.06210539531313935,
+            "ci_low": 0.04711270985500061,
+            "ci_high": 0.07604116585683941
+          },
+          "delta_recall@5": {
+            "n": 454,
+            "mean": 0.00881057268722467,
+            "ci_low": 0.0022026431718061676,
+            "ci_high": 0.01762114537444934
+          },
+          "delta_recall@20": {
+            "n": 454,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 454,
+            "mean": 0.00881057268722467,
+            "ci_low": 0.0022026431718061676,
+            "ci_high": 0.01762114537444934
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 454,
+            "mean_diff": 0.06210539531313935,
+            "ci_low": 0.047738674881035184,
+            "ci_high": 0.07638814572474438,
+            "p_two_sided": 0.0
+          }
         },
         "bge_base": {
           "n": 454,
-          "mean_delta_recall@5": 0.0022026431718061676,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.12279796194994434,
-          "mean_gold_rank_delta": 0.7376237623762376,
-          "top5_crossing_rate": 0.0022026431718061676,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.0917743008273721
+          "clean_mrr": {
+            "n": 454,
+            "mean": 0.36820705185532454,
+            "ci_low": 0.32669131900829673,
+            "ci_high": 0.41420580902017834
+          },
+          "mutated_mrr": {
+            "n": 454,
+            "mean": 0.2454090899053802,
+            "ci_low": 0.21622730766895207,
+            "ci_high": 0.2766699392340985
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.12279796194994434,
+            "ci_low": 0.10312808864226816,
+            "ci_high": 0.1424043050378403
+          },
+          "delta_recall@5": {
+            "n": 454,
+            "mean": 0.0022026431718061676,
+            "ci_low": 0.0,
+            "ci_high": 0.00881057268722467
+          },
+          "delta_recall@20": {
+            "n": 454,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 454,
+            "mean": 0.0022026431718061676,
+            "ci_low": 0.0,
+            "ci_high": 0.00881057268722467
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 454,
+            "mean_diff": 0.12279796194994434,
+            "ci_low": 0.1043119664843233,
+            "ci_high": 0.1421216249334366,
+            "p_two_sided": 0.0
+          }
         },
         "hybrid": {
           "n": 454,
-          "mean_delta_recall@5": 0.0022026431718061676,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.0807012859876296,
-          "mean_gold_rank_delta": 0.49748743718592964,
-          "top5_crossing_rate": 0.0022026431718061676,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.060801832846343606
+          "clean_mrr": {
+            "n": 454,
+            "mean": 0.37901116260147094,
+            "ci_low": 0.33543557030341165,
+            "ci_high": 0.4239783613351895
+          },
+          "mutated_mrr": {
+            "n": 454,
+            "mean": 0.2983098766138413,
+            "ci_low": 0.2638463298815722,
+            "ci_high": 0.3349590937696665
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.08070128598762961,
+            "ci_low": 0.06490446869576827,
+            "ci_high": 0.09762798691763448
+          },
+          "delta_recall@5": {
+            "n": 454,
+            "mean": 0.0022026431718061676,
+            "ci_low": 0.0,
+            "ci_high": 0.006607929515418502
+          },
+          "delta_recall@20": {
+            "n": 454,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 454,
+            "mean": 0.0022026431718061676,
+            "ci_low": 0.0,
+            "ci_high": 0.006607929515418502
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 454,
+            "mean_diff": 0.08070128598762961,
+            "ci_low": 0.06329072664975749,
+            "ci_high": 0.09730726872246695,
+            "p_two_sided": 0.0
+          }
         }
       },
       "conflict": {
         "bm25": {
           "n": 523,
-          "mean_delta_recall@5": 0.0019120458891013384,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.04772451364229567,
-          "mean_gold_rank_delta": 0.2943722943722944,
-          "top5_crossing_rate": 0.0019120458891013384,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.036104082222432284
+          "clean_mrr": {
+            "n": 523,
+            "mean": 0.36639148675729133,
+            "ci_low": 0.3309628558268741,
+            "ci_high": 0.404196868077189
+          },
+          "mutated_mrr": {
+            "n": 523,
+            "mean": 0.31866697311499564,
+            "ci_low": 0.285013079654571,
+            "ci_high": 0.3565871300241583
+          },
+          "delta_mrr": {
+            "n": 523,
+            "mean": 0.04772451364229567,
+            "ci_low": 0.03608699489322414,
+            "ci_high": 0.06048601127579944
+          },
+          "delta_recall@5": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0057361376673040155
+          },
+          "delta_recall@20": {
+            "n": 523,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0057361376673040155
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 523,
+            "mean_diff": 0.04772451364229567,
+            "ci_low": 0.03581596997592772,
+            "ci_high": 0.060167457761676334,
+            "p_two_sided": 0.0
+          }
         },
         "bge_base": {
           "n": 523,
-          "mean_delta_recall@5": 0.0019120458891013384,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.1340320069551729,
-          "mean_gold_rank_delta": 0.756198347107438,
-          "top5_crossing_rate": 0.0019120458891013384,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.09987736002233515
+          "clean_mrr": {
+            "n": 523,
+            "mean": 0.39080725051339926,
+            "ci_low": 0.35269919540725614,
+            "ci_high": 0.4296857325693997
+          },
+          "mutated_mrr": {
+            "n": 523,
+            "mean": 0.25677524355822634,
+            "ci_low": 0.229882488846399,
+            "ci_high": 0.2857536363015569
+          },
+          "delta_mrr": {
+            "n": 523,
+            "mean": 0.13403200695517292,
+            "ci_low": 0.11648932735943403,
+            "ci_high": 0.1525989300357822
+          },
+          "delta_recall@5": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0057361376673040155
+          },
+          "delta_recall@20": {
+            "n": 523,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0057361376673040155
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 523,
+            "mean_diff": 0.13403200695517292,
+            "ci_low": 0.11607580700261466,
+            "ci_high": 0.1512364530009757,
+            "p_two_sided": 0.0
+          }
         },
         "hybrid": {
           "n": 523,
-          "mean_delta_recall@5": 0.0019120458891013384,
-          "mean_delta_recall@20": 0.0,
-          "mean_delta_mrr": 0.06805276198201629,
-          "mean_gold_rank_delta": 0.4125,
-          "top5_crossing_rate": 0.0019120458891013384,
-          "top20_crossing_rate": 0.0,
-          "mean_delta_ndcg@5": 0.05123626802572908
+          "clean_mrr": {
+            "n": 523,
+            "mean": 0.39967911841716813,
+            "ci_low": 0.3624922987040578,
+            "ci_high": 0.441722958897911
+          },
+          "mutated_mrr": {
+            "n": 523,
+            "mean": 0.3316263564351518,
+            "ci_low": 0.29847956138826115,
+            "ci_high": 0.36832333854800386
+          },
+          "delta_mrr": {
+            "n": 523,
+            "mean": 0.06805276198201629,
+            "ci_low": 0.05410739634807512,
+            "ci_high": 0.08329924138958557
+          },
+          "delta_recall@5": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0057361376673040155
+          },
+          "delta_recall@20": {
+            "n": 523,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "top5_crossing_rate": {
+            "n": 523,
+            "mean": 0.0019120458891013384,
+            "ci_low": 0.0,
+            "ci_high": 0.0076481835564053535
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 523,
+            "mean_diff": 0.06805276198201629,
+            "ci_low": 0.053467193789851535,
+            "ci_high": 0.08196845020817295,
+            "p_two_sided": 0.0
+          }
         }
       },
       "noise": {
         "bm25": {
           "n": 531,
-          "mean_delta_recall@5": 0.03389830508474576,
-          "mean_delta_recall@20": 0.003766478342749529,
-          "mean_delta_mrr": 0.02724566542586168,
-          "mean_gold_rank_delta": 85.19067796610169,
-          "top5_crossing_rate": 0.03389830508474576,
-          "top20_crossing_rate": 0.003766478342749529,
-          "mean_delta_ndcg@5": 0.03195591333319751
+          "clean_mrr": {
+            "n": 531,
+            "mean": 0.3684044210434338,
+            "ci_low": 0.3317104477264677,
+            "ci_high": 0.408180640105261
+          },
+          "mutated_mrr": {
+            "n": 531,
+            "mean": 0.34115875561757214,
+            "ci_low": 0.3034037437477446,
+            "ci_high": 0.37991083112106
+          },
+          "delta_mrr": {
+            "n": 531,
+            "mean": 0.02724566542586168,
+            "ci_low": 0.019361799187475666,
+            "ci_high": 0.03579246258141589
+          },
+          "delta_recall@5": {
+            "n": 531,
+            "mean": 0.03389830508474576,
+            "ci_low": 0.018832391713747645,
+            "ci_high": 0.04896421845574388
+          },
+          "delta_recall@20": {
+            "n": 531,
+            "mean": 0.003766478342749529,
+            "ci_low": 0.0,
+            "ci_high": 0.009416195856873822
+          },
+          "top5_crossing_rate": {
+            "n": 531,
+            "mean": 0.03389830508474576,
+            "ci_low": 0.018832391713747645,
+            "ci_high": 0.05084745762711865
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 531,
+            "mean_diff": 0.02724566542586168,
+            "ci_low": 0.019174122468428152,
+            "ci_high": 0.036314450010182985,
+            "p_two_sided": 0.0
+          }
         },
         "bge_base": {
           "n": 531,
-          "mean_delta_recall@5": 0.0018832391713747645,
-          "mean_delta_recall@20": 0.0018832391713747645,
-          "mean_delta_mrr": 0.059573863130955015,
-          "mean_gold_rank_delta": 40.906882591093115,
-          "top5_crossing_rate": 0.0018832391713747645,
-          "top20_crossing_rate": 0.0018832391713747645,
-          "mean_delta_ndcg@5": 0.044652002736162745
+          "clean_mrr": {
+            "n": 531,
+            "mean": 0.3930800854083637,
+            "ci_low": 0.35427182598681267,
+            "ci_high": 0.4321134562648835
+          },
+          "mutated_mrr": {
+            "n": 531,
+            "mean": 0.3335062222774087,
+            "ci_low": 0.2971027168714316,
+            "ci_high": 0.36826168142905435
+          },
+          "delta_mrr": {
+            "n": 531,
+            "mean": 0.05957386313095501,
+            "ci_low": 0.0458851954781928,
+            "ci_high": 0.07291171330802984
+          },
+          "delta_recall@5": {
+            "n": 531,
+            "mean": 0.0018832391713747645,
+            "ci_low": 0.0,
+            "ci_high": 0.00569679849340862
+          },
+          "delta_recall@20": {
+            "n": 531,
+            "mean": 0.0018832391713747645,
+            "ci_low": 0.0,
+            "ci_high": 0.005649717514124294
+          },
+          "top5_crossing_rate": {
+            "n": 531,
+            "mean": 0.0018832391713747645,
+            "ci_low": 0.0,
+            "ci_high": 0.005649717514124294
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 531,
+            "mean_diff": 0.05957386313095501,
+            "ci_low": 0.04741149208551825,
+            "ci_high": 0.07308298568715235,
+            "p_two_sided": 0.0
+          }
         },
         "hybrid": {
           "n": 531,
-          "mean_delta_recall@5": 0.007532956685499058,
-          "mean_delta_recall@20": 0.0018832391713747645,
-          "mean_delta_mrr": 0.03442054388382072,
-          "mean_gold_rank_delta": 41.11020408163265,
-          "top5_crossing_rate": 0.007532956685499058,
-          "top20_crossing_rate": 0.0018832391713747645,
-          "mean_delta_ndcg@5": 0.028136941363657575
+          "clean_mrr": {
+            "n": 531,
+            "mean": 0.4011905441283972,
+            "ci_low": 0.3634973728405932,
+            "ci_high": 0.4394282854099238
+          },
+          "mutated_mrr": {
+            "n": 531,
+            "mean": 0.3667700002445765,
+            "ci_low": 0.3301692061861553,
+            "ci_high": 0.40613465669609744
+          },
+          "delta_mrr": {
+            "n": 531,
+            "mean": 0.03442054388382072,
+            "ci_low": 0.023806993121964878,
+            "ci_high": 0.04563347016030631
+          },
+          "delta_recall@5": {
+            "n": 531,
+            "mean": 0.007532956685499058,
+            "ci_low": 0.0018832391713747645,
+            "ci_high": 0.015065913370998116
+          },
+          "delta_recall@20": {
+            "n": 531,
+            "mean": 0.0018832391713747645,
+            "ci_low": 0.0,
+            "ci_high": 0.005649717514124294
+          },
+          "top5_crossing_rate": {
+            "n": 531,
+            "mean": 0.007532956685499058,
+            "ci_low": 0.0018832391713747645,
+            "ci_high": 0.015112994350282443
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 531,
+            "mean_diff": 0.03442054388382072,
+            "ci_low": 0.02382664586407524,
+            "ci_high": 0.045596929749472125,
+            "p_two_sided": 0.0
+          }
         }
       },
       "boundary": {
         "bm25": {
           "n": 251,
-          "mean_delta_recall@5": 0.3147410358565737,
-          "mean_delta_recall@20": 0.25697211155378485,
-          "mean_delta_mrr": 3.6745776696191915e-05,
-          "mean_gold_rank_delta": 254.04661016949152,
-          "top5_crossing_rate": 0.03187250996015936,
-          "top20_crossing_rate": 0.02390438247011952,
-          "mean_delta_ndcg@5": 0.22283097921812392
+          "clean_mrr": {
+            "n": 251,
+            "mean": 0.7793734963110094,
+            "ci_low": 0.7359395611116358,
+            "ci_high": 0.8231072682472348
+          },
+          "mutated_mrr": {
+            "n": 251,
+            "mean": 0.7793367505343133,
+            "ci_low": 0.7362629346865929,
+            "ci_high": 0.82119961331146
+          },
+          "delta_mrr": {
+            "n": 251,
+            "mean": 3.674577669619302e-05,
+            "ci_low": -0.03296065476316608,
+            "ci_high": 0.032584548203041706
+          },
+          "delta_recall@5": {
+            "n": 251,
+            "mean": 0.3147410358565737,
+            "ci_low": 0.2788844621513944,
+            "ci_high": 0.34865537848605577
+          },
+          "delta_recall@20": {
+            "n": 251,
+            "mean": 0.25697211155378485,
+            "ci_low": 0.22310756972111553,
+            "ci_high": 0.29282868525896416
+          },
+          "top5_crossing_rate": {
+            "n": 251,
+            "mean": 0.03187250996015936,
+            "ci_low": 0.01195219123505976,
+            "ci_high": 0.055776892430278883
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 251,
+            "mean_diff": 3.674577669619302e-05,
+            "ci_low": -0.032393828708045525,
+            "ci_high": 0.03061436008424371,
+            "p_two_sided": 1.0
+          }
         },
         "bge_base": {
           "n": 251,
-          "mean_delta_recall@5": 0.13545816733067728,
-          "mean_delta_recall@20": 0.11155378486055777,
-          "mean_delta_mrr": -0.07029924130993538,
-          "mean_gold_rank_delta": 39.902834008097166,
-          "top5_crossing_rate": 0.0,
-          "top20_crossing_rate": 0.00398406374501992,
-          "mean_delta_ndcg@5": 0.09188664823447605
+          "clean_mrr": {
+            "n": 251,
+            "mean": 0.8315757982145066,
+            "ci_low": 0.7953279805397651,
+            "ci_high": 0.8673170956044723
+          },
+          "mutated_mrr": {
+            "n": 251,
+            "mean": 0.9018750395244419,
+            "ci_low": 0.8744479225953329,
+            "ci_high": 0.9302848131284386
+          },
+          "delta_mrr": {
+            "n": 251,
+            "mean": -0.07029924130993538,
+            "ci_low": -0.10884761257009107,
+            "ci_high": -0.03407435389218784
+          },
+          "delta_recall@5": {
+            "n": 251,
+            "mean": 0.13545816733067728,
+            "ci_low": 0.099601593625498,
+            "ci_high": 0.17131474103585656
+          },
+          "delta_recall@20": {
+            "n": 251,
+            "mean": 0.11155378486055777,
+            "ci_low": 0.08366533864541832,
+            "ci_high": 0.13745019920318724
+          },
+          "top5_crossing_rate": {
+            "n": 251,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 251,
+            "mean_diff": -0.07029924130993538,
+            "ci_low": -0.1077108336143249,
+            "ci_high": -0.03460139168280289,
+            "p_two_sided": 0.0
+          }
         },
         "hybrid": {
           "n": 251,
-          "mean_delta_recall@5": 0.2649402390438247,
-          "mean_delta_recall@20": 0.14342629482071714,
-          "mean_delta_mrr": -0.001770923267290738,
-          "mean_gold_rank_delta": 40.80816326530612,
-          "top5_crossing_rate": 0.01593625498007968,
-          "top20_crossing_rate": 0.00398406374501992,
-          "mean_delta_ndcg@5": 0.20119318758914656
+          "clean_mrr": {
+            "n": 251,
+            "mean": 0.8487337806062906,
+            "ci_low": 0.8127394678141691,
+            "ci_high": 0.884885300069563
+          },
+          "mutated_mrr": {
+            "n": 251,
+            "mean": 0.8505047038735813,
+            "ci_low": 0.8139361670963204,
+            "ci_high": 0.8855520774046669
+          },
+          "delta_mrr": {
+            "n": 251,
+            "mean": -0.0017709232672907366,
+            "ci_low": -0.030293395639071758,
+            "ci_high": 0.025702097813651587
+          },
+          "delta_recall@5": {
+            "n": 251,
+            "mean": 0.2649402390438247,
+            "ci_low": 0.23306772908366533,
+            "ci_high": 0.300796812749004
+          },
+          "delta_recall@20": {
+            "n": 251,
+            "mean": 0.14342629482071714,
+            "ci_low": 0.11553784860557768,
+            "ci_high": 0.17136454183266928
+          },
+          "top5_crossing_rate": {
+            "n": 251,
+            "mean": 0.01593625498007968,
+            "ci_low": 0.00398406374501992,
+            "ci_high": 0.03187250996015936
+          },
+          "paired_clean_vs_mutated_mrr": {
+            "n": 251,
+            "mean_diff": -0.0017709232672907366,
+            "ci_low": -0.03238174688564307,
+            "ci_high": 0.025539291353387904,
+            "p_two_sided": 0.916
+          }
         }
       }
     },
-    "note": "BER = behaviorally_effective / semantically_valid. Paired metrics use construction retrievers (BM25, BGE, Hybrid) only. Primary tables exclude Random-HN baseline."
+    "note": "BER excludes Missing (deterministic control). Paired metrics on construction retrievers for semantically valid mutations. Random-HN excluded from primary tables."
   },
   "rq3_transferability": {
     "held_out_by_failure": {
-      "missing": {
-        "e5_large": {
-          "n": 531,
-          "challenge_rate": 0.4689265536723164,
-          "mean_delta_mrr": 0.42079124579124577,
-          "mean_delta_recall@5": 0.4613935969868173
-        },
-        "gte_large": {
-          "n": 531,
-          "challenge_rate": 0.4595103578154426,
-          "mean_delta_mrr": 0.373400169860788,
-          "mean_delta_recall@5": 0.4387947269303202
-        }
-      },
       "hard_negative": {
         "e5_large": {
-          "n": 450,
-          "challenge_rate": 0.32,
-          "mean_delta_mrr": 0.1368625140291807,
-          "mean_delta_recall@5": 0.0044444444444444444
+          "n": 366,
+          "challenge_rate": {
+            "n": 366,
+            "mean": 0.24316939890710382,
+            "ci_low": 0.20218579234972678,
+            "ci_high": 0.2869535519125682
+          },
+          "delta_mrr": {
+            "n": 366,
+            "mean": 0.09901887729756584,
+            "ci_low": 0.07929551664182811,
+            "ci_high": 0.1187181238615665
+          },
+          "delta_recall@5": {
+            "n": 366,
+            "mean": 0.00546448087431694,
+            "ci_low": 0.0,
+            "ci_high": 0.01366120218579235
+          }
         },
         "gte_large": {
-          "n": 450,
-          "challenge_rate": 0.3466666666666667,
-          "mean_delta_mrr": 0.1254611191277858,
-          "mean_delta_recall@5": 0.006666666666666667
+          "n": 366,
+          "challenge_rate": {
+            "n": 366,
+            "mean": 0.2459016393442623,
+            "ci_low": 0.20491803278688525,
+            "ci_high": 0.2923497267759563
+          },
+          "delta_mrr": {
+            "n": 366,
+            "mean": 0.07789748578683005,
+            "ci_low": 0.06009222297132133,
+            "ci_high": 0.09523222442023671
+          },
+          "delta_recall@5": {
+            "n": 366,
+            "mean": 0.00819672131147541,
+            "ci_low": 0.0,
+            "ci_high": 0.01912568306010929
+          }
         }
       },
       "conflict": {
         "e5_large": {
-          "n": 516,
-          "challenge_rate": 0.3313953488372093,
-          "mean_delta_mrr": 0.13973798058100384,
-          "mean_delta_recall@5": 0.003875968992248062
+          "n": 359,
+          "challenge_rate": {
+            "n": 359,
+            "mean": 0.24512534818941503,
+            "ci_low": 0.20334261838440112,
+            "ci_high": 0.28690807799442897
+          },
+          "delta_mrr": {
+            "n": 359,
+            "mean": 0.09198179567260348,
+            "ci_low": 0.07238066599139022,
+            "ci_high": 0.11075947497256687
+          },
+          "delta_recall@5": {
+            "n": 359,
+            "mean": 0.005571030640668524,
+            "ci_low": 0.0,
+            "ci_high": 0.013927576601671309
+          }
         },
         "gte_large": {
-          "n": 516,
-          "challenge_rate": 0.3624031007751938,
-          "mean_delta_mrr": 0.1334684810616753,
-          "mean_delta_recall@5": 0.007751937984496124
-        }
-      },
-      "noise": {
-        "e5_large": {
-          "n": 521,
-          "challenge_rate": 0.16314779270633398,
-          "mean_delta_mrr": 0.05960244703047007,
-          "mean_delta_recall@5": 0.003838771593090211
-        },
-        "gte_large": {
-          "n": 521,
-          "challenge_rate": 0.2495201535508637,
-          "mean_delta_mrr": 0.07809311519824466,
-          "mean_delta_recall@5": 0.01727447216890595
+          "n": 359,
+          "challenge_rate": {
+            "n": 359,
+            "mean": 0.24233983286908078,
+            "ci_low": 0.20055710306406685,
+            "ci_high": 0.28690807799442897
+          },
+          "delta_mrr": {
+            "n": 359,
+            "mean": 0.07718796601108578,
+            "ci_low": 0.0606660202804005,
+            "ci_high": 0.09622591438660379
+          },
+          "delta_recall@5": {
+            "n": 359,
+            "mean": 0.008356545961002786,
+            "ci_low": 0.0,
+            "ci_high": 0.019498607242339833
+          }
         }
       },
       "boundary": {
         "e5_large": {
-          "n": 218,
-          "challenge_rate": 0.4036697247706422,
-          "mean_delta_mrr": -0.05336738949124271,
-          "mean_delta_recall@5": 0.17889908256880735
+          "n": 137,
+          "challenge_rate": {
+            "n": 137,
+            "mean": 0.5693430656934306,
+            "ci_low": 0.48905109489051096,
+            "ci_high": 0.6496350364963503
+          },
+          "delta_mrr": {
+            "n": 137,
+            "mean": -0.06052311435523115,
+            "ci_low": -0.104867700729927,
+            "ci_high": -0.01824665450121654
+          },
+          "delta_recall@5": {
+            "n": 137,
+            "mean": 0.2737226277372263,
+            "ci_low": 0.22992700729927007,
+            "ci_high": 0.31386861313868614
+          }
         },
         "gte_large": {
-          "n": 218,
-          "challenge_rate": 0.37155963302752293,
-          "mean_delta_mrr": -0.13222477064220184,
-          "mean_delta_recall@5": 0.14678899082568808
+          "n": 137,
+          "challenge_rate": {
+            "n": 137,
+            "mean": 0.5182481751824818,
+            "ci_low": 0.4306569343065693,
+            "ci_high": 0.6058394160583942
+          },
+          "delta_mrr": {
+            "n": 137,
+            "mean": -0.14535106013208202,
+            "ci_low": -0.20181721411192213,
+            "ci_high": -0.09584875738616615
+          },
+          "delta_recall@5": {
+            "n": 137,
+            "mean": 0.22262773722627738,
+            "ci_low": 0.1714416058394161,
+            "ci_high": 0.27007299270072993
+          }
+        }
+      },
+      "noise": {
+        "e5_large": {
+          "n": 5,
+          "challenge_rate": {
+            "n": 5,
+            "mean": 0.8,
+            "ci_low": 0.4,
+            "ci_high": 1.0
+          },
+          "delta_mrr": {
+            "n": 5,
+            "mean": 0.06333333333333332,
+            "ci_low": 0.019999999999999997,
+            "ci_high": 0.12000000000000002
+          },
+          "delta_recall@5": {
+            "n": 5,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          }
+        },
+        "gte_large": {
+          "n": 5,
+          "challenge_rate": {
+            "n": 5,
+            "mean": 0.8,
+            "ci_low": 0.4,
+            "ci_high": 1.0
+          },
+          "delta_mrr": {
+            "n": 5,
+            "mean": 0.1637593984962406,
+            "ci_low": 0.03418546365914786,
+            "ci_high": 0.33333333333333337
+          },
+          "delta_recall@5": {
+            "n": 5,
+            "mean": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0
+          }
         }
       }
     },
     "ablation_validation_filters": {
       "raw_mutations": {
         "n_mutations": 2322,
-        "held_out_challenge_rate": 0.3385012919896641
+        "held_out_challenge_rate": {
+          "n": 4644,
+          "mean": 0.3385012919896641,
+          "ci_low": 0.32536068044788974,
+          "ci_high": 0.35336455641688197
+        }
       },
       "plus_semantic": {
         "n_mutations": 2290,
-        "held_out_challenge_rate": 0.3384279475982533
+        "held_out_challenge_rate": {
+          "n": 4580,
+          "mean": 0.3384279475982533,
+          "ci_low": 0.32489082969432315,
+          "ci_high": 0.3521834061135371
+        }
       },
       "plus_semantic_behavioral": {
-        "n_mutations": 2236,
-        "held_out_challenge_rate": 0.3432468694096601
+        "n_mutations": 867,
+        "held_out_challenge_rate": {
+          "n": 1734,
+          "mean": 0.2946943483275663,
+          "ci_low": 0.2739186851211073,
+          "ci_high": 0.3149077277970011
+        }
       }
     },
-    "note": "Held-out = E5-large + GTE-large; never used for mutation acceptance. Challenge = ΔMRR>0 or Recall@5 drops vs clean."
+    "note": "Held-out = E5-large + GTE-large on behaviorally accepted set. Challenge = ΔMRR>0 or Recall@5 drops vs clean."
   },
   "rq3_random_baseline": {
     "llm_hard_negative": {
-      "raw_mutations": {
-        "n_mutations": 479,
-        "held_out_challenge_rate": 0.33089770354906056
+      "n_semantic": 454,
+      "n_accepted": 351,
+      "on_semantic_valid": {
+        "bm25": {
+          "role": "construction",
+          "n": 454,
+          "challenge_rate": {
+            "n": 454,
+            "mean": 0.18061674008810572,
+            "ci_low": 0.14537444933920704,
+            "ci_high": 0.21585903083700442
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.06210539531313935,
+            "ci_low": 0.047701857099028445,
+            "ci_high": 0.07607065174115372
+          },
+          "construction_pass_rate": 0.73568281938326
+        },
+        "bge_base": {
+          "role": "construction",
+          "n": 454,
+          "challenge_rate": {
+            "n": 454,
+            "mean": 0.32819383259911894,
+            "ci_low": 0.28634361233480177,
+            "ci_high": 0.36784140969163
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.12279796194994434,
+            "ci_low": 0.10471035343144373,
+            "ci_high": 0.14188044105307318
+          },
+          "construction_pass_rate": 0.8810572687224669
+        },
+        "hybrid": {
+          "role": "construction",
+          "n": 454,
+          "challenge_rate": {
+            "n": 454,
+            "mean": 0.21365638766519823,
+            "ci_low": 0.1762114537444934,
+            "ci_high": 0.2488986784140969
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.08070128598762961,
+            "ci_low": 0.06479403061451519,
+            "ci_high": 0.09738386063275933
+          },
+          "construction_pass_rate": 0.775330396475771
+        },
+        "e5_large": {
+          "role": "held_out",
+          "n": 454,
+          "challenge_rate": {
+            "n": 454,
+            "mean": 0.31938325991189426,
+            "ci_low": 0.2775330396475771,
+            "ci_high": 0.3634361233480176
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.13566585458105282,
+            "ci_low": 0.11810136052151471,
+            "ci_high": 0.1556963147443599
+          },
+          "construction_pass_rate": null
+        },
+        "gte_large": {
+          "role": "held_out",
+          "n": 454,
+          "challenge_rate": {
+            "n": 454,
+            "mean": 0.34801762114537443,
+            "ci_low": 0.3061123348017621,
+            "ci_high": 0.3898678414096916
+          },
+          "delta_mrr": {
+            "n": 454,
+            "mean": 0.1243734217755985,
+            "ci_low": 0.10454481979682807,
+            "ci_high": 0.14285945024786045
+          },
+          "construction_pass_rate": null
+        }
       },
-      "plus_semantic": {
-        "n_mutations": 454,
-        "held_out_challenge_rate": 0.33370044052863435
+      "on_accepted": {
+        "bm25": {
+          "role": "construction",
+          "n": 351,
+          "challenge_rate": {
+            "n": 351,
+            "mean": 0.22792022792022792,
+            "ci_low": 0.18518518518518517,
+            "ci_high": 0.2678062678062678
+          },
+          "delta_mrr": {
+            "n": 351,
+            "mean": 0.07748105262725147,
+            "ci_low": 0.05999729937595435,
+            "ci_high": 0.09526152291503168
+          },
+          "construction_pass_rate": 0.9458689458689459
+        },
+        "bge_base": {
+          "role": "construction",
+          "n": 351,
+          "challenge_rate": {
+            "n": 351,
+            "mean": 0.2564102564102564,
+            "ci_low": 0.21367521367521367,
+            "ci_high": 0.29914529914529914
+          },
+          "delta_mrr": {
+            "n": 351,
+            "mean": 0.08617124803022239,
+            "ci_low": 0.06905888330567818,
+            "ci_high": 0.10448054290201725
+          },
+          "construction_pass_rate": 0.9715099715099715
+        },
+        "hybrid": {
+          "role": "construction",
+          "n": 351,
+          "challenge_rate": {
+            "n": 351,
+            "mean": 0.27635327635327633,
+            "ci_low": 0.22792022792022792,
+            "ci_high": 0.3190883190883191
+          },
+          "delta_mrr": {
+            "n": 351,
+            "mean": 0.10580736136291694,
+            "ci_low": 0.08731733287288844,
+            "ci_high": 0.12709761431983654
+          },
+          "construction_pass_rate": 1.0
+        },
+        "e5_large": {
+          "role": "held_out",
+          "n": 351,
+          "challenge_rate": {
+            "n": 351,
+            "mean": 0.245014245014245,
+            "ci_low": 0.19943019943019943,
+            "ci_high": 0.2905982905982906
+          },
+          "delta_mrr": {
+            "n": 351,
+            "mean": 0.09897694897694898,
+            "ci_low": 0.08045789087455754,
+            "ci_high": 0.11925591383924718
+          },
+          "construction_pass_rate": null
+        },
+        "gte_large": {
+          "role": "held_out",
+          "n": 351,
+          "challenge_rate": {
+            "n": 351,
+            "mean": 0.25071225071225073,
+            "ci_low": 0.20512820512820512,
+            "ci_high": 0.2934472934472934
+          },
+          "delta_mrr": {
+            "n": 351,
+            "mean": 0.07979006590117702,
+            "ci_low": 0.06274266628433295,
+            "ci_high": 0.0970494423272201
+          },
+          "construction_pass_rate": null
+        }
       },
-      "plus_semantic_behavioral": {
-        "n_mutations": 450,
-        "held_out_challenge_rate": 0.3333333333333333
+      "ablation": {
+        "raw_mutations": {
+          "n_mutations": 479,
+          "held_out_challenge_rate": {
+            "n": 958,
+            "mean": 0.33089770354906056,
+            "ci_low": 0.30062630480167013,
+            "ci_high": 0.36119519832985386
+          }
+        },
+        "plus_semantic": {
+          "n_mutations": 454,
+          "held_out_challenge_rate": {
+            "n": 908,
+            "mean": 0.33370044052863435,
+            "ci_low": 0.30286343612334804,
+            "ci_high": 0.3656387665198238
+          }
+        },
+        "plus_semantic_behavioral": {
+          "n_mutations": 366,
+          "held_out_challenge_rate": {
+            "n": 732,
+            "mean": 0.24453551912568305,
+            "ci_low": 0.21311475409836064,
+            "ci_high": 0.273224043715847
+          }
+        }
       }
     },
     "random_hard_negative": {
-      "raw_mutations": {
-        "n_mutations": 531,
-        "held_out_challenge_rate": 0.032015065913371
+      "n_semantic": 326,
+      "n_accepted": 186,
+      "on_semantic_valid": {
+        "bm25": {
+          "role": "construction",
+          "n": 326,
+          "challenge_rate": {
+            "n": 326,
+            "mean": 0.09202453987730061,
+            "ci_low": 0.06441717791411043,
+            "ci_high": 0.12576687116564417
+          },
+          "delta_mrr": {
+            "n": 326,
+            "mean": 0.004615646793560904,
+            "ci_low": -0.0010665642299077878,
+            "ci_high": 0.009909218465583495
+          },
+          "construction_pass_rate": 0.6073619631901841
+        },
+        "bge_base": {
+          "role": "construction",
+          "n": 326,
+          "challenge_rate": {
+            "n": 326,
+            "mean": 0.046012269938650305,
+            "ci_low": 0.024539877300613498,
+            "ci_high": 0.0705521472392638
+          },
+          "delta_mrr": {
+            "n": 326,
+            "mean": 0.0046194858311422735,
+            "ci_low": 0.002093923458954134,
+            "ci_high": 0.007517984954718083
+          },
+          "construction_pass_rate": 0.3159509202453988
+        },
+        "hybrid": {
+          "role": "construction",
+          "n": 326,
+          "challenge_rate": {
+            "n": 326,
+            "mean": 0.049079754601226995,
+            "ci_low": 0.027607361963190184,
+            "ci_high": 0.0736196319018405
+          },
+          "delta_mrr": {
+            "n": 326,
+            "mean": 0.0068543675138767165,
+            "ci_low": 0.0007619412795793164,
+            "ci_high": 0.01342373117679866
+          },
+          "construction_pass_rate": 0.5705521472392638
+        },
+        "e5_large": {
+          "role": "held_out",
+          "n": 326,
+          "challenge_rate": {
+            "n": 326,
+            "mean": 0.024539877300613498,
+            "ci_low": 0.009202453987730062,
+            "ci_high": 0.04294478527607362
+          },
+          "delta_mrr": {
+            "n": 326,
+            "mean": 0.0029268916155419226,
+            "ci_low": 0.0007796523517382412,
+            "ci_high": 0.005483128834355829
+          },
+          "construction_pass_rate": null
+        },
+        "gte_large": {
+          "role": "held_out",
+          "n": 326,
+          "challenge_rate": {
+            "n": 326,
+            "mean": 0.06441717791411043,
+            "ci_low": 0.03987730061349693,
+            "ci_high": 0.09202453987730061
+          },
+          "delta_mrr": {
+            "n": 326,
+            "mean": 0.004652241078621447,
+            "ci_low": 0.0023460143724714274,
+            "ci_high": 0.007283596813888225
+          },
+          "construction_pass_rate": null
+        }
       },
-      "plus_semantic": {
-        "n_mutations": 326,
-        "held_out_challenge_rate": 0.04447852760736196
+      "on_accepted": {
+        "bm25": {
+          "role": "construction",
+          "n": 186,
+          "challenge_rate": {
+            "n": 186,
+            "mean": 0.08064516129032258,
+            "ci_low": 0.043010752688172046,
+            "ci_high": 0.12365591397849462
+          },
+          "delta_mrr": {
+            "n": 186,
+            "mean": 0.0029758622500557987,
+            "ci_low": -0.003931156209382016,
+            "ci_high": 0.008664751467170821
+          },
+          "construction_pass_rate": 0.956989247311828
+        },
+        "bge_base": {
+          "role": "construction",
+          "n": 186,
+          "challenge_rate": {
+            "n": 186,
+            "mean": 0.07526881720430108,
+            "ci_low": 0.03763440860215054,
+            "ci_high": 0.11827956989247312
+          },
+          "delta_mrr": {
+            "n": 186,
+            "mean": 0.0072004608294930885,
+            "ci_low": 0.0031806835637480796,
+            "ci_high": 0.012612247183819767
+          },
+          "construction_pass_rate": 0.5483870967741935
+        },
+        "hybrid": {
+          "role": "construction",
+          "n": 186,
+          "challenge_rate": {
+            "n": 186,
+            "mean": 0.08602150537634409,
+            "ci_low": 0.04838709677419355,
+            "ci_high": 0.12903225806451613
+          },
+          "delta_mrr": {
+            "n": 186,
+            "mean": 0.014701740911418331,
+            "ci_low": 0.00600460247637667,
+            "ci_high": 0.0258872567844342
+          },
+          "construction_pass_rate": 1.0
+        },
+        "e5_large": {
+          "role": "held_out",
+          "n": 186,
+          "challenge_rate": {
+            "n": 186,
+            "mean": 0.026881720430107527,
+            "ci_low": 0.005376344086021506,
+            "ci_high": 0.053763440860215055
+          },
+          "delta_mrr": {
+            "n": 186,
+            "mean": 0.0028897849462365594,
+            "ci_low": 0.0001792114695340503,
+            "ci_high": 0.00649641577060932
+          },
+          "construction_pass_rate": null
+        },
+        "gte_large": {
+          "role": "held_out",
+          "n": 186,
+          "challenge_rate": {
+            "n": 186,
+            "mean": 0.053763440860215055,
+            "ci_low": 0.021505376344086023,
+            "ci_high": 0.0913978494623656
+          },
+          "delta_mrr": {
+            "n": 186,
+            "mean": 0.004324349485639809,
+            "ci_low": 0.0014976376669925057,
+            "ci_high": 0.00830787715868361
+          },
+          "construction_pass_rate": null
+        }
       },
-      "plus_semantic_behavioral": {
-        "n_mutations": 322,
-        "held_out_challenge_rate": 0.04503105590062112
+      "ablation": {
+        "raw_mutations": {
+          "n_mutations": 531,
+          "held_out_challenge_rate": {
+            "n": 1062,
+            "mean": 0.032015065913371,
+            "ci_low": 0.021657250470809793,
+            "ci_high": 0.0423728813559322
+          }
+        },
+        "plus_semantic": {
+          "n_mutations": 326,
+          "held_out_challenge_rate": {
+            "n": 652,
+            "mean": 0.04447852760736196,
+            "ci_low": 0.029141104294478526,
+            "ci_high": 0.06134969325153374
+          }
+        },
+        "plus_semantic_behavioral": {
+          "n_mutations": 309,
+          "held_out_challenge_rate": {
+            "n": 618,
+            "mean": 0.032362459546925564,
+            "ci_low": 0.019377022653721685,
+            "ci_high": 0.04692556634304207
+          }
+        }
       }
     },
-    "note": "Random HN = BM25-related corpus chunk (no LLM). Compare held-out challenge rates Raw → +Semantic → +Behavioral."
+    "note": "Random HN = BM25-near corpus chunk. Compare challenge_rate / ΔMRR / construction_pass_rate."
   }
 }

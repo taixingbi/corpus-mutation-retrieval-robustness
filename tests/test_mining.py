@@ -81,9 +81,27 @@ def test_report_excludes_random_from_primary_rq1():
             "generator": {"prompt_id": "hard_negative_random"},
         },
     ]
-    report = build_rq_report(mutations=mutations, behavior=[], retrieval=[])
+    summary = [
+        {
+            "mutation_id": "s1_hard_negative_01",
+            "failure": "hard_negative",
+            "accepted": True,
+            "bm25_pass": True,
+            "dense_pass": True,
+            "hybrid_pass": True,
+        },
+        {
+            "mutation_id": "s1_hard_negative_random_01",
+            "failure": "hard_negative",
+            "accepted": False,
+            "bm25_pass": False,
+            "dense_pass": False,
+            "hybrid_pass": False,
+        },
+    ]
+    report = build_rq_report(
+        mutations=mutations, behavior_summary=summary, retrieval=[]
+    )
     assert report["rq1_semantic_validity"]["hard_negative"]["generated"] == 1
     assert "rq3_random_baseline" in report
-    assert report["rq3_random_baseline"]["random_hard_negative"]["raw_mutations"][
-        "n_mutations"
-    ] == 1
+    assert report["rq3_random_baseline"]["random_hard_negative"]["n_semantic"] == 1

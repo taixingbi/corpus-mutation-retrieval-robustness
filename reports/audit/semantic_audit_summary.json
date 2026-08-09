@@ -1,0 +1,63 @@
+{
+  "n": 250,
+  "human_ok_rate": 0.704,
+  "by_failure": {
+    "boundary": {
+      "n": 50,
+      "labels": {
+        "answer_leak": 50
+      },
+      "ok_rate": 0.0
+    },
+    "conflict": {
+      "n": 50,
+      "labels": {
+        "ok": 50
+      },
+      "ok_rate": 1.0
+    },
+    "hard_negative": {
+      "n": 50,
+      "labels": {
+        "ok": 26,
+        "topical_fail": 24
+      },
+      "ok_rate": 0.52
+    },
+    "missing": {
+      "n": 50,
+      "labels": {
+        "ok": 50
+      },
+      "ok_rate": 1.0
+    },
+    "noise": {
+      "n": 50,
+      "labels": {
+        "ok": 50
+      },
+      "ok_rate": 1.0
+    }
+  },
+  "hard_negative_split": {
+    "llm": {
+      "n": 26,
+      "labels": {
+        "ok": 26
+      },
+      "ok_rate": 1.0
+    },
+    "random": {
+      "n": 24,
+      "labels": {
+        "topical_fail": 24
+      },
+      "ok_rate": 0.0
+    }
+  },
+  "findings": [
+    "Missing / Conflict / Noise: 50/50 ok.",
+    "Boundary: 0/50 ok \u2014 all answer_leak (at least one split piece contains full gold).",
+    "Hard Negative: all topical_fail are Random HN; LLM HN 26/26 ok in sample."
+  ]
+}
