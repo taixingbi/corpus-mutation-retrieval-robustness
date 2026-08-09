@@ -1,4 +1,4 @@
-# Paper 4: Generate → Validate → Transfer (200 seeds)
+# Paper 4: Generate → Validate → Transfer (200-seed pilot archive)
 run_id: pilot
 base_dir: data/runs/pilot/0_base
 output_dir: data/runs/pilot
@@ -41,10 +41,11 @@ embed_concurrency: 1
 embed_batch_size: 128
 embed_device: null
 http_retries: 5
+include_random_hn_baseline: false
 
 mutation_oversample:
   missing: 1
-  hard_negative: 4
+  hard_negative: 1
   conflict: 1
   boundary: 1
-  noise: 6
+  noise: 1

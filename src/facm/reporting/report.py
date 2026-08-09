@@ -23,16 +23,88 @@ def _gold_rank(ranked_ids: list[str], relevant_ids: list[str]) -> int | None:
     return min(ranks) if ranks else None
 
 
+def is_random_hn(m: dict) -> bool:
+    meta = m.get("metadata") or {}
+    if meta.get("baseline") == "random":
+        return True
+    gen = m.get("generator") or {}
+    return gen.get("prompt_id") == "hard_negative_random"
+
+
+def _challenge_rate(
+    mutated: list[dict],
+    clean: dict[tuple[str, str], dict],
+    mids: set[str],
+) -> float:
+    flags = []
+    for r in mutated:
+        if r.get("retriever_role") != "held_out":
+            continue
+        if r.get("mutation_id") not in mids:
+            continue
+        c = clean.get((r["sample_id"], r["retriever"]))
+        if not c:
+            continue
+        flags.append(
+            1.0
+            if (
+                float(c["mrr"]) - float(r["mrr"]) > 0
+                or float(r["recall_at_5"]) < float(c["recall_at_5"])
+            )
+            else 0.0
+        )
+    return mean(flags)
+
+
+def _ablation_block(
+    mutations: list[dict],
+    mutated: list[dict],
+    clean: dict[tuple[str, str], dict],
+    mut_accepted: dict[str, bool],
+) -> dict[str, Any]:
+    all_mids = {m["mutation_id"] for m in mutations}
+    sem_pass = {
+        m["mutation_id"]
+        for m in mutations
+        if (m.get("semantic") or {}).get("passed")
+    }
+    beh_pass = {mid for mid in all_mids if mut_accepted.get(mid)}
+    return {
+        "raw_mutations": {
+            "n_mutations": len(all_mids),
+            "held_out_challenge_rate": _challenge_rate(mutated, clean, all_mids),
+        },
+        "plus_semantic": {
+            "n_mutations": len(sem_pass),
+            "held_out_challenge_rate": _challenge_rate(mutated, clean, sem_pass),
+        },
+        "plus_semantic_behavioral": {
+            "n_mutations": len(beh_pass),
+            "held_out_challenge_rate": _challenge_rate(mutated, clean, beh_pass),
+        },
+    }
+
+
 def build_rq_report(
     *,
     mutations: list[dict],
     behavior: list[dict],
     retrieval: list[dict],
 ) -> dict[str, Any]:
-    """Paper 4 report: RQ1 Validity → RQ2 Effectiveness → RQ3 Transfer (+ ablation)."""
+    """Paper 4 report: RQ1 Validity → RQ2 Effectiveness → RQ3 Transfer (+ ablation).
+
+    Primary RQ tables exclude Random-HN baseline mutations.
+    """
+    primary = [m for m in mutations if not is_random_hn(m)]
+    random_hn = [m for m in mutations if is_random_hn(m)]
+    llm_hn = [
+        m
+        for m in primary
+        if m.get("failure") == "hard_negative"
+    ]
 
     by_fail_gen: dict[str, list[bool]] = defaultdict(list)
-    for m in mutations:
+    for m in primary:
         sem = (m.get("semantic") or {}).get("passed")
         if sem is not None:
             by_fail_gen[m["failure"]].append(bool(sem))
@@ -46,34 +118,43 @@ def build_rq_report(
             "semantic_validity_rate": (n_valid / n_gen) if n_gen else 0.0,
         }
 
+    primary_ids = {m["mutation_id"] for m in primary}
     mut_accepted: dict[str, bool] = {}
     mut_fail: dict[str, str] = {}
     for b in behavior:
         mid = b["mutation_id"]
+        if mid not in primary_ids and mid not in {m["mutation_id"] for m in random_hn}:
+            continue
         mut_fail[mid] = b["failure"]
         if b.get("accepted") is not None:
             mut_accepted[mid] = bool(b["accepted"])
 
+    # Primary BER uses primary mutations only
+    primary_accepted = {
+        mid: ok for mid, ok in mut_accepted.items() if mid in primary_ids
+    }
+    primary_fail = {mid: f for mid, f in mut_fail.items() if mid in primary_ids}
+
     sem_pass_ids = {
         m["mutation_id"]
-        for m in mutations
+        for m in primary
         if (m.get("semantic") or {}).get("passed")
     }
     rq2_ber: dict[str, Any] = {}
-    for failure in sorted(set(list(by_fail_gen.keys()) + list(mut_fail.values()))):
+    for failure in sorted(set(list(by_fail_gen.keys()) + list(primary_fail.values()))):
         sem_n = rq1.get(failure, {}).get("valid", 0)
-        beh_mids = {mid for mid, f in mut_fail.items() if f == failure}
+        beh_mids = {mid for mid, f in primary_fail.items() if f == failure}
         denom_ids = beh_mids & sem_pass_ids if sem_pass_ids else beh_mids
         if not denom_ids and sem_n:
             denom = sem_n
             eff = sum(
                 1
-                for mid, ok in mut_accepted.items()
-                if mut_fail.get(mid) == failure and ok
+                for mid, ok in primary_accepted.items()
+                if primary_fail.get(mid) == failure and ok
             )
         else:
             denom = len(denom_ids) if denom_ids else sem_n
-            eff = sum(1 for mid in denom_ids if mut_accepted.get(mid))
+            eff = sum(1 for mid in denom_ids if primary_accepted.get(mid))
         rq2_ber[failure] = {
             "semantically_valid": denom,
             "behaviorally_effective": eff,
@@ -92,6 +173,8 @@ def build_rq_report(
         if r.get("retriever") not in construction_names:
             continue
         mid = r.get("mutation_id")
+        if mid not in primary_ids:
+            continue
         if mid not in sem_pass_ids and sem_pass_ids:
             continue
         c = clean.get((r["sample_id"], r["retriever"]))
@@ -146,7 +229,7 @@ def build_rq_report(
                 ),
             }
 
-    accepted_ids = {mid for mid, ok in mut_accepted.items() if ok}
+    accepted_ids = {mid for mid, ok in primary_accepted.items() if ok}
     rq3: dict[str, Any] = defaultdict(lambda: defaultdict(list))
     for r in mutated:
         if r.get("retriever_role") != "held_out":
@@ -177,54 +260,23 @@ def build_rq_report(
                 "mean_delta_recall@5": mean([x["delta_recall@5"] for x in rows]),
             }
 
-    all_mids = {m["mutation_id"] for m in mutations}
-    beh_pass = accepted_ids
+    ablation = _ablation_block(primary, mutated, clean, primary_accepted)
 
-    def challenge_rate(mids: set[str]) -> float:
-        flags = []
-        for r in mutated:
-            if r.get("retriever_role") != "held_out":
-                continue
-            if r.get("mutation_id") not in mids:
-                continue
-            c = clean.get((r["sample_id"], r["retriever"]))
-            if not c:
-                continue
-            flags.append(
-                1.0
-                if (
-                    float(c["mrr"]) - float(r["mrr"]) > 0
-                    or float(r["recall_at_5"]) < float(c["recall_at_5"])
-                )
-                else 0.0
-            )
-        return mean(flags)
-
-    ablation = {
-        "raw_mutations": {
-            "n_mutations": len(all_mids),
-            "held_out_challenge_rate": challenge_rate(all_mids),
-        },
-        "plus_semantic": {
-            "n_mutations": len(sem_pass_ids),
-            "held_out_challenge_rate": challenge_rate(sem_pass_ids),
-        },
-        "plus_semantic_behavioral": {
-            "n_mutations": len(beh_pass),
-            "held_out_challenge_rate": challenge_rate(beh_pass),
-        },
-    }
-
-    return {
+    report: dict[str, Any] = {
         "paper": "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation",
         "scope": "Generate → Validate → Transfer",
+        "finding": (
+            "Behavioral validation—not semantic validation alone—is the key step "
+            "for constructing robust retrieval evaluation benchmarks."
+        ),
         "rq1_semantic_validity": rq1,
         "rq2_behavioral_effectiveness": {
             "ber_by_failure": rq2_ber,
             "paired_clean_to_mutated": rq2_metrics,
             "note": (
                 "BER = behaviorally_effective / semantically_valid. "
-                "Paired metrics use construction retrievers (BM25, BGE, Hybrid) only."
+                "Paired metrics use construction retrievers (BM25, BGE, Hybrid) only. "
+                "Primary tables exclude Random-HN baseline."
             ),
         },
         "rq3_transferability": {
@@ -236,3 +288,19 @@ def build_rq_report(
             ),
         },
     }
+
+    if random_hn or llm_hn:
+        report["rq3_random_baseline"] = {
+            "llm_hard_negative": _ablation_block(
+                llm_hn, mutated, clean, mut_accepted
+            ),
+            "random_hard_negative": _ablation_block(
+                random_hn, mutated, clean, mut_accepted
+            ),
+            "note": (
+                "Random HN = BM25-related corpus chunk (no LLM). "
+                "Compare held-out challenge rates Raw → +Semantic → +Behavioral."
+            ),
+        }
+
+    return report

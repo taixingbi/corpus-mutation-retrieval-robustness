@@ -1,0 +1,52 @@
+# Main experiment: merged ~531 unique seeds, one mutation per (seed, failure)
+# + Random HN baseline ablation
+run_id: main
+base_dir: data/runs/main/0_base
+output_dir: data/runs/main
+
+failures:
+  - missing
+  - hard_negative
+  - conflict
+  - boundary
+  - noise
+
+construction_retrievers:
+  - bm25
+  - bge_base
+  - hybrid
+
+held_out_retrievers:
+  - e5_large
+  - gte_large
+
+dense_models:
+  bge_base: BAAI/bge-base-en-v1.5
+  e5_large: intfloat/e5-large-v2
+  gte_large: thenlper/gte-large
+
+rrf_k: 60
+top_k: 20
+
+chat:
+  model: openai.gpt-oss-120b-1:0
+  temperature: 0
+  max_tokens: 1024
+  judge_max_tokens: 1024
+
+noise_add_count: 5
+behavioral_majority: 2
+seed_limit: null
+llm_concurrency: 8
+embed_concurrency: 1
+embed_batch_size: 128
+embed_device: null
+http_retries: 5
+include_random_hn_baseline: true
+
+mutation_oversample:
+  missing: 1
+  hard_negative: 1
+  conflict: 1
+  boundary: 1
+  noise: 1

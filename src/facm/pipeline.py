@@ -8,7 +8,7 @@ from facm.config import AppConfig
 from facm.io import load_models, read_jsonl, write_jsonl
 from facm.metrics.ranking import compute_ranking_metrics
 from facm.mutations.mining import DistractorMiner
-from facm.mutations.operators import generate_one_mutation
+from facm.mutations.operators import generate_one_mutation, generate_random_hard_negative
 from facm.reporting.report import build_rq_report, write_report
 from facm.retrieval.corpus import Corpus, load_seeds
 from facm.retrieval.retrievers import Retriever, apply_mutation_retrievers, build_retrievers
@@ -160,6 +160,18 @@ def stage1_mutate(cfg: AppConfig, *, require_llm: bool = True) -> list[Mutation]
         jobs, _job, max_concurrency=cfg.llm_concurrency, desc="stage1-mutate"
     )
     mutations = [m for m in results if m is not None]
+
+    if cfg.include_random_hn_baseline:
+        print(f"[mutate] random HN baseline for {len(seeds)} seeds…")
+
+        def _rand(seed: CleanSeed) -> Mutation | None:
+            return generate_random_hard_negative(seed, corpus, miner=miner, attempt=1)
+
+        rand_rows = map_concurrent(
+            seeds, _rand, max_concurrency=cfg.llm_concurrency, desc="stage1-random-hn"
+        )
+        mutations.extend(m for m in rand_rows if m is not None)
+
     write_jsonl(cfg.output_path / "2_mutations" / "mutation.jsonl", mutations)
     return mutations
 

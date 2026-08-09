@@ -212,47 +212,44 @@ def generate_hard_negative(
     attempt: int = 1,
     miner: DistractorMiner | None = None,
 ) -> Mutation | None:
+    """LLM hard-negative: same entity/relation, wrong plausible fact, lexically competitive."""
     gold = corpus.get(seed.gold_chunk_id)
     style = gold.text[:500] if gold else ""
     mined = miner.top_non_gold(seed, n=8) if miner is not None else []
-    if mined:
-        examples = miner.format_examples(mined[:5]) if miner else ""
+    examples = ""
+    if mined and miner is not None:
+        examples = miner.format_examples(mined[:5])
         focus = mined[(attempt - 1) % len(mined)]
-        prompt_id = "hard_negative"
-        user = (
-            f"Question: {seed.question}\n"
-            f"Gold answer (must NOT appear anywhere, including paraphrases): {seed.gold_answer}\n"
-            f"Gold passage style:\n{style}\n\n"
-            f"High-scoring non-answer distractors already retrieved for this query "
-            f"(compete with these in dense/sparse retrieval):\n{examples}\n\n"
-            f"Focus near-miss theme from distractor:\n{focus.text[:400]}\n\n"
-            "Write ONE hard-negative chunk (~80-150 words) that:\n"
-            "- Shares entities/phrases that make BM25 and dense retrievers rank it high\n"
-            "- Is a topical near-miss that does NOT answer the question\n"
-            "- Uses overlapping vocabulary with the question and the distractors above\n"
-            "- Never states or paraphrases the gold answer\n"
-            "- Sounds like natural Wikipedia prose"
-        )
-        system = (
-            "You write retrieval hard-negatives that transfer across sparse and dense "
-            'retrievers. Return ONLY JSON: {"text": "..."}.'
+        distractor_block = (
+            f"Lexically competitive non-answer distractors (style/vocab cues only):\n"
+            f"{examples}\n\n"
+            f"Optional focus phrase from distractor:\n{focus.text[:400]}\n\n"
         )
     else:
-        prompt_id = "hard_negative"
-        user = (
-            f"Question: {seed.question}\n"
-            f"Gold answer (must NOT appear anywhere, including paraphrases): {seed.gold_answer}\n"
-            f"Style reference:\n{style}\n\n"
-            "Write ONE hard-negative chunk (~80-150 words):\n"
-            "- Same entity/topic as the question (topical near-miss)\n"
-            "- Natural encyclopedic Wikipedia prose\n"
-            "- Discuss related facts that do NOT answer the question\n"
-            "- Do not mention the gold answer value at all"
-        )
-        system = (
-            "You write Wikipedia-style passages for an IR hard-negative benchmark. "
-            'Return ONLY JSON: {"text": "..."}.'
-        )
+        distractor_block = ""
+
+    prompt_id = "hard_negative"
+    user = (
+        f"Question: {seed.question}\n"
+        f"Correct gold answer (FORBIDDEN — never state or paraphrase): {seed.gold_answer}\n"
+        f"Gold passage style:\n{style}\n\n"
+        f"{distractor_block}"
+        "Write ONE hard-negative Wikipedia-style chunk (~80-150 words) that:\n"
+        "1. Mentions the SAME primary entity/entities as the question\n"
+        "2. Addresses the SAME relation / question intent "
+        "(e.g. birth date, death date, location, role) — not a loosely related topic\n"
+        "3. States a WRONG but PLAUSIBLE fact for that relation "
+        "(a confident incorrect answer that a reader might believe)\n"
+        "4. Is lexically similar to the question (shared names, dates, places, terms) "
+        "so sparse and dense retrievers would rank it highly\n"
+        "5. Never includes the gold answer value or a paraphrase of it\n"
+        "6. Sounds like natural encyclopedic prose (no meta commentary)"
+    )
+    system = (
+        "You write cross-retriever hard-negatives for IR evaluation: "
+        "same entity, same relation, wrong plausible fact, high lexical overlap. "
+        'Return ONLY JSON: {"text": "..."}.'
+    )
     text = _llm_chunk(
         chat,
         prompt_id=prompt_id,
@@ -283,7 +280,72 @@ def generate_hard_negative(
         gold_answer=seed.gold_answer,
         metadata={
             "attempt": attempt,
+            "baseline": "llm",
             "mined_distractor_ids": [c.chunk_id for c in mined[:5]],
+        },
+    )
+
+
+def generate_random_hard_negative(
+    seed: CleanSeed,
+    corpus: Corpus,
+    *,
+    miner: DistractorMiner | None = None,
+    attempt: int = 1,
+    rank: int = 0,
+) -> Mutation | None:
+    """Baseline: add one BM25-related corpus chunk (no LLM)."""
+    if miner is not None:
+        pool = miner.top_non_gold(seed, n=max(20, rank + 5))
+    else:
+        q_tokens = set(seed.question.lower().split())
+        pool = []
+        for c in corpus.all():
+            if c.chunk_id == seed.gold_chunk_id:
+                continue
+            if _contains_answer(c.text, seed.gold_answer):
+                continue
+            if q_tokens & set(c.text.lower().split()):
+                pool.append(c)
+        pool.sort(
+            key=lambda c: len(q_tokens & set(c.text.lower().split())), reverse=True
+        )
+    if not pool:
+        return None
+    chosen = pool[min(rank, len(pool) - 1)]
+    cid = f"{seed.sample_id}_hn_random_{attempt:02d}"
+    return Mutation(
+        mutation_id=f"{seed.sample_id}_hard_negative_random_{attempt:02d}",
+        sample_id=seed.sample_id,
+        failure="hard_negative",
+        original_gold_ids=[seed.gold_chunk_id],
+        mutated_relevant_ids=[seed.gold_chunk_id],
+        add=[cid],
+        chunk_payloads={
+            cid: ChunkPayload(
+                text=chosen.text,
+                metadata={
+                    "role": "hard_negative",
+                    "page_title": chosen.page_title,
+                    "source_chunk_id": chosen.chunk_id,
+                    "page_id": chosen.page_id,
+                    "revision_id": chosen.revision_id,
+                    "section_title": chosen.section_title,
+                },
+            )
+        },
+        generator=GeneratorInfo(
+            model="corpus",
+            prompt_id="hard_negative_random",
+            temperature=0.0,
+        ),
+        question=seed.question,
+        gold_answer=seed.gold_answer,
+        metadata={
+            "attempt": attempt,
+            "baseline": "random",
+            "source_chunk_id": chosen.chunk_id,
+            "bm25_rank": rank,
         },
     )
 

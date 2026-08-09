@@ -14,7 +14,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--mutations",
-        default="data/runs/pilot/3_semantic/mutation.jsonl",
+        default="data/runs/main/3_semantic/mutation.jsonl",
         help="Semantic-validated (or raw) mutation.jsonl",
     )
     p.add_argument("--out", default="reports/audit/semantic_audit_sample.jsonl")

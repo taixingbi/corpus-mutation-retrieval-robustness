@@ -6,14 +6,29 @@
 
 **Story:** Generate → Validate → Transfer
 
+**Finding:** Behavioral validation—not semantic validation alone—is the key step for constructing robust retrieval evaluation benchmarks.
+
 Reranker recovery, generator EM/F1, cost, and latency are **out of scope**.
 
-## Dataset
+## Research questions
 
-Reuse RAGFailBench assets:
+| RQ | Question | Main metrics |
+|----|----------|--------------|
+| **RQ1 Validity** | Semantically valid mutations? | SVR + human audit 30–50/failure |
+| **RQ2 Effectiveness** | Do they induce retrieval failures? | BER, Recall@5/20, MRR, Gold Rank Δ, Top-k crossing |
+| **RQ3 Transferability** | Transfer to unseen retrievers? | Held-out ΔMRR / ΔRecall@5 / Challenge Rate |
 
-- `chunks.jsonl` — base corpus  
-- `clean_seeds.jsonl` — query + gold evidence  
+**Ablation (RQ3):** Raw → +Semantic → +Semantic+Behavioral on held-out challenge rate.
+
+**Baseline (RQ3):** Random HN (BM25-related corpus chunk, no LLM) vs LLM HN under the same filters.
+
+## Dataset scale
+
+| Run | Clean seeds | Notes |
+|-----|-------------|-------|
+| `pilot` | 200 | Pipeline / signal check (done) |
+| `main` | ~531 | Merge unique RAGFailBench stability seeds (current max) |
+| Future | 1000 | Requires generating more clean seeds in RAGFailBench (Paper 2) |
 
 Each seed yields **one mutation per failure** (never inject five failures into one corpus):
 
@@ -21,15 +36,14 @@ Each seed yields **one mutation per failure** (never inject five failures into o
 (seed_i, failure_f) → one mutated corpus state
 ```
 
-Failures: `missing` | `hard_negative` | `conflict` | `boundary` | `noise`  
-(`evidence_position` is not used.)
+Failures: `missing` | `hard_negative` | `conflict` | `boundary` | `noise`
 
 ## Pipeline
 
 ```
 Base Corpus + Clean Seeds
         ↓
- Corpus Mutation (one failure at a time)
+ Corpus Mutation (one failure at a time; + Random HN baseline)
         ↓
  Semantic Validation          → RQ1
         ↓
@@ -39,18 +53,18 @@ Base Corpus + Clean Seeds
         ↓
  Held-out Retrievers (E5, GTE) → RQ3  (never used for acceptance)
         ↓
- Transferability + ablation
+ Transferability + ablation + Random vs LLM HN
 ```
 
-## Research questions
+## Operators (locked)
 
-| RQ | Question | Main metrics |
-|----|----------|--------------|
-| **RQ1 Validity** | Semantically valid mutations? | SVR (Semantic Validity Rate) + human audit 30–50/failure |
-| **RQ2 Effectiveness** | Do they induce retrieval failures? | BER, Recall@5/20, MRR, Gold Rank Δ, Top-5/20 crossing |
-| **RQ3 Transferability** | Transfer to unseen retrievers? | Held-out ΔMRR / ΔRecall@5 / Challenge Rate |
-
-**Ablation (under RQ3):** Raw → +Semantic → +Semantic+Behavioral on held-out challenge rate.
+| Failure | Change? | Note |
+|---------|---------|------|
+| Missing | No | Rule; strong control |
+| Hard Negative | Prompt only | Same entity/relation, wrong plausible fact, lexical overlap |
+| Conflict | No | Transfer OK |
+| Boundary | No | Transfer OK |
+| Noise | No | Semantically easy, behaviorally hard — **paper finding** |
 
 ## Contributions
 

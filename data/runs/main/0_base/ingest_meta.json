@@ -1,0 +1,19 @@
+{
+  "source_seeds": [
+    "/Users/h/Desktop/work/paper2-RAGFailBench Automated Construction and Controllable Failure-Injection Benchmarking for Retrieval-Augmented Generation/RAGFailBench/data/runs/pilot_stability_s42/6_final/clean_seeds.jsonl",
+    "/Users/h/Desktop/work/paper2-RAGFailBench Automated Construction and Controllable Failure-Injection Benchmarking for Retrieval-Augmented Generation/RAGFailBench/data/runs/pilot_stability_s123/6_final/clean_seeds.jsonl",
+    "/Users/h/Desktop/work/paper2-RAGFailBench Automated Construction and Controllable Failure-Injection Benchmarking for Retrieval-Augmented Generation/RAGFailBench/data/runs/pilot_stability_s2026/6_final/clean_seeds.jsonl",
+    "/Users/h/Desktop/work/paper2-RAGFailBench Automated Construction and Controllable Failure-Injection Benchmarking for Retrieval-Augmented Generation/RAGFailBench/data/runs/pilot_v1/6_final/clean_seeds.jsonl"
+  ],
+  "source_chunks": "/Users/h/Desktop/work/paper2-RAGFailBench Automated Construction and Controllable Failure-Injection Benchmarking for Retrieval-Augmented Generation/RAGFailBench/data/runs/pilot_stability_corpus/3_processed/chunks.jsonl",
+  "seeds_runs": [
+    "pilot_stability_s42",
+    "pilot_stability_s123",
+    "pilot_stability_s2026",
+    "pilot_v1"
+  ],
+  "n_seeds": 531,
+  "n_chunks": 12366,
+  "full_corpus": true,
+  "dedupe_key": "question+gold_chunk_id+gold_answer"
+}

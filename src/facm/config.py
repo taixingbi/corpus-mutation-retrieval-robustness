@@ -51,14 +51,16 @@ class AppConfig(BaseModel):
     embed_batch_size: int = 128
     embed_device: str | None = None
     http_retries: int = 5
-    # Per-failure generation attempts (HN/noise may need more for transfer)
+    # Random BM25-chunk HN baseline (ablation vs LLM HN; excluded from primary RQ tables)
+    include_random_hn_baseline: bool = False
+    # Per-failure generation attempts (main run: 1 = one case per seed×failure)
     mutation_oversample: dict[str, int] = Field(
         default_factory=lambda: {
             "missing": 1,
-            "hard_negative": 4,
+            "hard_negative": 1,
             "conflict": 1,
             "boundary": 1,
-            "noise": 6,
+            "noise": 1,
         }
     )
 

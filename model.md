@@ -29,3 +29,9 @@ See `example_inference.md`.
 | `gte_large` | `thenlper/gte-large` |
 
 Local SentenceTransformers; embeddings cached under `{output_dir}/_embed_cache/`.
+
+## Main run scale
+
+- `configs/main.yaml` — ~531 merged unique seeds + Random HN baseline  
+- `configs/pilot.yaml` — 200-seed archive  
+- 1000 seeds requires more RAGFailBench clean-seed generation (Paper 2)

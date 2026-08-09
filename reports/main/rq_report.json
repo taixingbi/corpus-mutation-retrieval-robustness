@@ -1,0 +1,344 @@
+{
+  "paper": "Behaviorally Validated Corpus Mutation for Retrieval Robustness Evaluation",
+  "scope": "Generate → Validate → Transfer",
+  "finding": "Behavioral validation—not semantic validation alone—is the key step for constructing robust retrieval evaluation benchmarks.",
+  "rq1_semantic_validity": {
+    "boundary": {
+      "generated": 251,
+      "valid": 251,
+      "semantic_validity_rate": 1.0
+    },
+    "conflict": {
+      "generated": 530,
+      "valid": 523,
+      "semantic_validity_rate": 0.9867924528301887
+    },
+    "hard_negative": {
+      "generated": 479,
+      "valid": 454,
+      "semantic_validity_rate": 0.9478079331941545
+    },
+    "missing": {
+      "generated": 531,
+      "valid": 531,
+      "semantic_validity_rate": 1.0
+    },
+    "noise": {
+      "generated": 531,
+      "valid": 531,
+      "semantic_validity_rate": 1.0
+    }
+  },
+  "rq2_behavioral_effectiveness": {
+    "ber_by_failure": {
+      "boundary": {
+        "semantically_valid": 251,
+        "behaviorally_effective": 218,
+        "behavioral_effectiveness_rate": 0.8685258964143426
+      },
+      "conflict": {
+        "semantically_valid": 523,
+        "behaviorally_effective": 516,
+        "behavioral_effectiveness_rate": 0.9866156787762906
+      },
+      "hard_negative": {
+        "semantically_valid": 454,
+        "behaviorally_effective": 450,
+        "behavioral_effectiveness_rate": 0.9911894273127754
+      },
+      "missing": {
+        "semantically_valid": 531,
+        "behaviorally_effective": 531,
+        "behavioral_effectiveness_rate": 1.0
+      },
+      "noise": {
+        "semantically_valid": 531,
+        "behaviorally_effective": 521,
+        "behavioral_effectiveness_rate": 0.9811676082862524
+      }
+    },
+    "paired_clean_to_mutated": {
+      "missing": {
+        "bm25": {
+          "n": 531,
+          "mean_delta_recall@5": 0.423728813559322,
+          "mean_delta_recall@20": 0.4444444444444444,
+          "mean_delta_mrr": 0.36840442104343385,
+          "mean_gold_rank_delta": 9998.093220338984,
+          "top5_crossing_rate": 0.423728813559322,
+          "top20_crossing_rate": 0.4444444444444444,
+          "mean_delta_ndcg@5": 0.38081831761147106
+        },
+        "bge_base": {
+          "n": 531,
+          "mean_delta_recall@5": 0.4350282485875706,
+          "mean_delta_recall@20": 0.4651600753295669,
+          "mean_delta_mrr": 0.3930800854083637,
+          "mean_gold_rank_delta": 9998.165991902833,
+          "top5_crossing_rate": 0.4350282485875706,
+          "top20_crossing_rate": 0.4651600753295669,
+          "mean_delta_ndcg@5": 0.40125967568971643
+        },
+        "hybrid": {
+          "n": 531,
+          "mean_delta_recall@5": 0.4444444444444444,
+          "mean_delta_recall@20": 0.4613935969868173,
+          "mean_delta_mrr": 0.4011905441283972,
+          "mean_gold_rank_delta": 9998.457142857143,
+          "top5_crossing_rate": 0.4444444444444444,
+          "top20_crossing_rate": 0.4613935969868173,
+          "mean_delta_ndcg@5": 0.41090791038517727
+        }
+      },
+      "hard_negative": {
+        "bm25": {
+          "n": 454,
+          "mean_delta_recall@5": 0.00881057268722467,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.06210539531313934,
+          "mean_gold_rank_delta": 0.43455497382198954,
+          "top5_crossing_rate": 0.00881057268722467,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.04932661037369659
+        },
+        "bge_base": {
+          "n": 454,
+          "mean_delta_recall@5": 0.0022026431718061676,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.12279796194994434,
+          "mean_gold_rank_delta": 0.7376237623762376,
+          "top5_crossing_rate": 0.0022026431718061676,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.0917743008273721
+        },
+        "hybrid": {
+          "n": 454,
+          "mean_delta_recall@5": 0.0022026431718061676,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.0807012859876296,
+          "mean_gold_rank_delta": 0.49748743718592964,
+          "top5_crossing_rate": 0.0022026431718061676,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.060801832846343606
+        }
+      },
+      "conflict": {
+        "bm25": {
+          "n": 523,
+          "mean_delta_recall@5": 0.0019120458891013384,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.04772451364229567,
+          "mean_gold_rank_delta": 0.2943722943722944,
+          "top5_crossing_rate": 0.0019120458891013384,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.036104082222432284
+        },
+        "bge_base": {
+          "n": 523,
+          "mean_delta_recall@5": 0.0019120458891013384,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.1340320069551729,
+          "mean_gold_rank_delta": 0.756198347107438,
+          "top5_crossing_rate": 0.0019120458891013384,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.09987736002233515
+        },
+        "hybrid": {
+          "n": 523,
+          "mean_delta_recall@5": 0.0019120458891013384,
+          "mean_delta_recall@20": 0.0,
+          "mean_delta_mrr": 0.06805276198201629,
+          "mean_gold_rank_delta": 0.4125,
+          "top5_crossing_rate": 0.0019120458891013384,
+          "top20_crossing_rate": 0.0,
+          "mean_delta_ndcg@5": 0.05123626802572908
+        }
+      },
+      "noise": {
+        "bm25": {
+          "n": 531,
+          "mean_delta_recall@5": 0.03389830508474576,
+          "mean_delta_recall@20": 0.003766478342749529,
+          "mean_delta_mrr": 0.02724566542586168,
+          "mean_gold_rank_delta": 85.19067796610169,
+          "top5_crossing_rate": 0.03389830508474576,
+          "top20_crossing_rate": 0.003766478342749529,
+          "mean_delta_ndcg@5": 0.03195591333319751
+        },
+        "bge_base": {
+          "n": 531,
+          "mean_delta_recall@5": 0.0018832391713747645,
+          "mean_delta_recall@20": 0.0018832391713747645,
+          "mean_delta_mrr": 0.059573863130955015,
+          "mean_gold_rank_delta": 40.906882591093115,
+          "top5_crossing_rate": 0.0018832391713747645,
+          "top20_crossing_rate": 0.0018832391713747645,
+          "mean_delta_ndcg@5": 0.044652002736162745
+        },
+        "hybrid": {
+          "n": 531,
+          "mean_delta_recall@5": 0.007532956685499058,
+          "mean_delta_recall@20": 0.0018832391713747645,
+          "mean_delta_mrr": 0.03442054388382072,
+          "mean_gold_rank_delta": 41.11020408163265,
+          "top5_crossing_rate": 0.007532956685499058,
+          "top20_crossing_rate": 0.0018832391713747645,
+          "mean_delta_ndcg@5": 0.028136941363657575
+        }
+      },
+      "boundary": {
+        "bm25": {
+          "n": 251,
+          "mean_delta_recall@5": 0.3147410358565737,
+          "mean_delta_recall@20": 0.25697211155378485,
+          "mean_delta_mrr": 3.6745776696191915e-05,
+          "mean_gold_rank_delta": 254.04661016949152,
+          "top5_crossing_rate": 0.03187250996015936,
+          "top20_crossing_rate": 0.02390438247011952,
+          "mean_delta_ndcg@5": 0.22283097921812392
+        },
+        "bge_base": {
+          "n": 251,
+          "mean_delta_recall@5": 0.13545816733067728,
+          "mean_delta_recall@20": 0.11155378486055777,
+          "mean_delta_mrr": -0.07029924130993538,
+          "mean_gold_rank_delta": 39.902834008097166,
+          "top5_crossing_rate": 0.0,
+          "top20_crossing_rate": 0.00398406374501992,
+          "mean_delta_ndcg@5": 0.09188664823447605
+        },
+        "hybrid": {
+          "n": 251,
+          "mean_delta_recall@5": 0.2649402390438247,
+          "mean_delta_recall@20": 0.14342629482071714,
+          "mean_delta_mrr": -0.001770923267290738,
+          "mean_gold_rank_delta": 40.80816326530612,
+          "top5_crossing_rate": 0.01593625498007968,
+          "top20_crossing_rate": 0.00398406374501992,
+          "mean_delta_ndcg@5": 0.20119318758914656
+        }
+      }
+    },
+    "note": "BER = behaviorally_effective / semantically_valid. Paired metrics use construction retrievers (BM25, BGE, Hybrid) only. Primary tables exclude Random-HN baseline."
+  },
+  "rq3_transferability": {
+    "held_out_by_failure": {
+      "missing": {
+        "e5_large": {
+          "n": 531,
+          "challenge_rate": 0.4689265536723164,
+          "mean_delta_mrr": 0.42079124579124577,
+          "mean_delta_recall@5": 0.4613935969868173
+        },
+        "gte_large": {
+          "n": 531,
+          "challenge_rate": 0.4595103578154426,
+          "mean_delta_mrr": 0.373400169860788,
+          "mean_delta_recall@5": 0.4387947269303202
+        }
+      },
+      "hard_negative": {
+        "e5_large": {
+          "n": 450,
+          "challenge_rate": 0.32,
+          "mean_delta_mrr": 0.1368625140291807,
+          "mean_delta_recall@5": 0.0044444444444444444
+        },
+        "gte_large": {
+          "n": 450,
+          "challenge_rate": 0.3466666666666667,
+          "mean_delta_mrr": 0.1254611191277858,
+          "mean_delta_recall@5": 0.006666666666666667
+        }
+      },
+      "conflict": {
+        "e5_large": {
+          "n": 516,
+          "challenge_rate": 0.3313953488372093,
+          "mean_delta_mrr": 0.13973798058100384,
+          "mean_delta_recall@5": 0.003875968992248062
+        },
+        "gte_large": {
+          "n": 516,
+          "challenge_rate": 0.3624031007751938,
+          "mean_delta_mrr": 0.1334684810616753,
+          "mean_delta_recall@5": 0.007751937984496124
+        }
+      },
+      "noise": {
+        "e5_large": {
+          "n": 521,
+          "challenge_rate": 0.16314779270633398,
+          "mean_delta_mrr": 0.05960244703047007,
+          "mean_delta_recall@5": 0.003838771593090211
+        },
+        "gte_large": {
+          "n": 521,
+          "challenge_rate": 0.2495201535508637,
+          "mean_delta_mrr": 0.07809311519824466,
+          "mean_delta_recall@5": 0.01727447216890595
+        }
+      },
+      "boundary": {
+        "e5_large": {
+          "n": 218,
+          "challenge_rate": 0.4036697247706422,
+          "mean_delta_mrr": -0.05336738949124271,
+          "mean_delta_recall@5": 0.17889908256880735
+        },
+        "gte_large": {
+          "n": 218,
+          "challenge_rate": 0.37155963302752293,
+          "mean_delta_mrr": -0.13222477064220184,
+          "mean_delta_recall@5": 0.14678899082568808
+        }
+      }
+    },
+    "ablation_validation_filters": {
+      "raw_mutations": {
+        "n_mutations": 2322,
+        "held_out_challenge_rate": 0.3385012919896641
+      },
+      "plus_semantic": {
+        "n_mutations": 2290,
+        "held_out_challenge_rate": 0.3384279475982533
+      },
+      "plus_semantic_behavioral": {
+        "n_mutations": 2236,
+        "held_out_challenge_rate": 0.3432468694096601
+      }
+    },
+    "note": "Held-out = E5-large + GTE-large; never used for mutation acceptance. Challenge = ΔMRR>0 or Recall@5 drops vs clean."
+  },
+  "rq3_random_baseline": {
+    "llm_hard_negative": {
+      "raw_mutations": {
+        "n_mutations": 479,
+        "held_out_challenge_rate": 0.33089770354906056
+      },
+      "plus_semantic": {
+        "n_mutations": 454,
+        "held_out_challenge_rate": 0.33370044052863435
+      },
+      "plus_semantic_behavioral": {
+        "n_mutations": 450,
+        "held_out_challenge_rate": 0.3333333333333333
+      }
+    },
+    "random_hard_negative": {
+      "raw_mutations": {
+        "n_mutations": 531,
+        "held_out_challenge_rate": 0.032015065913371
+      },
+      "plus_semantic": {
+        "n_mutations": 326,
+        "held_out_challenge_rate": 0.04447852760736196
+      },
+      "plus_semantic_behavioral": {
+        "n_mutations": 322,
+        "held_out_challenge_rate": 0.04503105590062112
+      }
+    },
+    "note": "Random HN = BM25-related corpus chunk (no LLM). Compare held-out challenge rates Raw → +Semantic → +Behavioral."
+  }
+}
