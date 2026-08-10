@@ -18,6 +18,8 @@ Reranker recovery, generator EM/F1, cost, and latency are **out of scope**.
 | **RQ2 Effectiveness** | Do they induce retrieval failures? | BER, Recall@5/20, MRR, Gold Rank Δ, Top-k crossing |
 | **RQ3 Transferability** | Transfer to unseen retrievers? | Held-out ΔMRR / ΔRecall@5 / Challenge Rate |
 
+**Secondary / appendix:** nDCG@5/10/20 (clean + paired Δ + held-out Δ). Not used for acceptance or primary claims.
+
 **Ablation (RQ3):** Raw → +Semantic → +Semantic+Behavioral on held-out challenge rate (bootstrap 95% CI).
 
 **Behavioral validation (locked):** failure-specific meaningful effects (HN outrank / Top-5 cross / ΔMRR≥0.10; Conflict in Top-5 + effect; Noise Top-5 + Δrank≥3 or Top-5 cross; Boundary uses split relevance). Missing is a **deterministic negative control** (excluded from BER).
@@ -65,7 +67,7 @@ Base Corpus + Clean Seeds
 | Missing | No | Rule; strong control |
 | Hard Negative | Prompt only | Same entity/relation, wrong plausible fact, lexical overlap |
 | Conflict | No | Transfer OK |
-| Boundary | No | Transfer OK |
+| Boundary | Yes | Answer-span split: neither piece alone contains full gold |
 | Noise | No | Semantically easy, behaviorally hard — **paper finding** |
 
 ## Contributions

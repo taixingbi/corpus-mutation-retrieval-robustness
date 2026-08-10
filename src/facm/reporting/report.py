@@ -217,6 +217,18 @@ def build_rq_report(
                 "recall@20_mutated": float(r.get("recall_at_20", 0)),
                 "delta_recall@20": float(c.get("recall_at_20", 0))
                 - float(r.get("recall_at_20", 0)),
+                "ndcg@5_clean": float(c.get("ndcg_at_5", 0)),
+                "ndcg@5_mutated": float(r.get("ndcg_at_5", 0)),
+                "delta_ndcg@5": float(c.get("ndcg_at_5", 0))
+                - float(r.get("ndcg_at_5", 0)),
+                "ndcg@10_clean": float(c.get("ndcg_at_10", 0)),
+                "ndcg@10_mutated": float(r.get("ndcg_at_10", 0)),
+                "delta_ndcg@10": float(c.get("ndcg_at_10", 0))
+                - float(r.get("ndcg_at_10", 0)),
+                "ndcg@20_clean": float(c.get("ndcg_at_20", 0)),
+                "ndcg@20_mutated": float(r.get("ndcg_at_20", 0)),
+                "delta_ndcg@20": float(c.get("ndcg_at_20", 0))
+                - float(r.get("ndcg_at_20", 0)),
                 "top5_crossing": _cross(5),
             }
         )
@@ -257,6 +269,112 @@ def build_rq_report(
                     [x["mrr_mutated"] for x in rows],
                     n_boot=n_boot,
                     seed=bootstrap_seed + 6,
+                ),
+            }
+
+    # Appendix — nDCG (secondary; not used for acceptance / primary claims)
+    appendix_paired_ndcg: dict[str, Any] = {}
+    for failure, by_ret in paired.items():
+        appendix_paired_ndcg[failure] = {}
+        for ret, rows in by_ret.items():
+            appendix_paired_ndcg[failure][ret] = {
+                "n": len(rows),
+                "clean_ndcg@5": bootstrap_mean_ci(
+                    [x["ndcg@5_clean"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 60,
+                ),
+                "delta_ndcg@5": bootstrap_mean_ci(
+                    [x["delta_ndcg@5"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 61,
+                ),
+                "clean_ndcg@10": bootstrap_mean_ci(
+                    [x["ndcg@10_clean"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 62,
+                ),
+                "delta_ndcg@10": bootstrap_mean_ci(
+                    [x["delta_ndcg@10"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 63,
+                ),
+                "clean_ndcg@20": bootstrap_mean_ci(
+                    [x["ndcg@20_clean"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 64,
+                ),
+                "delta_ndcg@20": bootstrap_mean_ci(
+                    [x["delta_ndcg@20"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 65,
+                ),
+            }
+
+    appendix_clean_ndcg: dict[str, Any] = {}
+    by_ret_clean: dict[str, list[dict]] = defaultdict(list)
+    for (_sid, ret), c in clean.items():
+        by_ret_clean[ret].append(c)
+    for ret, rows in sorted(by_ret_clean.items()):
+        appendix_clean_ndcg[ret] = {
+            "n": len(rows),
+            "ndcg@5": bootstrap_mean_ci(
+                [float(c.get("ndcg_at_5", 0)) for c in rows],
+                n_boot=n_boot,
+                seed=bootstrap_seed + 70,
+            ),
+            "ndcg@10": bootstrap_mean_ci(
+                [float(c.get("ndcg_at_10", 0)) for c in rows],
+                n_boot=n_boot,
+                seed=bootstrap_seed + 71,
+            ),
+            "ndcg@20": bootstrap_mean_ci(
+                [float(c.get("ndcg_at_20", 0)) for c in rows],
+                n_boot=n_boot,
+                seed=bootstrap_seed + 72,
+            ),
+        }
+
+    appendix_heldout_ndcg: dict[str, Any] = defaultdict(lambda: defaultdict(list))
+    for r in mutated:
+        if r.get("retriever_role") != "held_out":
+            continue
+        mid = r.get("mutation_id")
+        if mid not in accepted_ids or r.get("failure") == "missing":
+            continue
+        c = clean.get((r["sample_id"], r["retriever"]))
+        if not c:
+            continue
+        appendix_heldout_ndcg[r["failure"]][r["retriever"]].append(
+            {
+                "delta_ndcg@5": float(c.get("ndcg_at_5", 0))
+                - float(r.get("ndcg_at_5", 0)),
+                "delta_ndcg@10": float(c.get("ndcg_at_10", 0))
+                - float(r.get("ndcg_at_10", 0)),
+                "delta_ndcg@20": float(c.get("ndcg_at_20", 0))
+                - float(r.get("ndcg_at_20", 0)),
+            }
+        )
+    appendix_heldout_ndcg_summary: dict[str, Any] = {}
+    for failure, by_ret in appendix_heldout_ndcg.items():
+        appendix_heldout_ndcg_summary[failure] = {}
+        for ret, rows in by_ret.items():
+            appendix_heldout_ndcg_summary[failure][ret] = {
+                "n": len(rows),
+                "delta_ndcg@5": bootstrap_mean_ci(
+                    [x["delta_ndcg@5"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 80,
+                ),
+                "delta_ndcg@10": bootstrap_mean_ci(
+                    [x["delta_ndcg@10"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 81,
+                ),
+                "delta_ndcg@20": bootstrap_mean_ci(
+                    [x["delta_ndcg@20"] for x in rows],
+                    n_boot=n_boot,
+                    seed=bootstrap_seed + 82,
                 ),
             }
 
@@ -454,4 +572,15 @@ def build_rq_report(
             ),
         },
         "rq3_random_baseline": random_baseline,
+        "appendix_ndcg": {
+            "role": "secondary",
+            "note": (
+                "nDCG@5/10/20 reported for appendix only. "
+                "Primary claims use MRR, Recall@k, Top-k crossing, BER, and held-out challenge rate. "
+                "nDCG is not used for behavioral acceptance."
+            ),
+            "clean_corpus": appendix_clean_ndcg,
+            "paired_clean_to_mutated_construction": appendix_paired_ndcg,
+            "held_out_accepted": appendix_heldout_ndcg_summary,
+        },
     }

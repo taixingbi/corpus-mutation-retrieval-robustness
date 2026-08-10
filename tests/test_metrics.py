@@ -1,10 +1,5 @@
 from facm.metrics.difficulty import cutoff_difficulty
-from facm.metrics.ranking import (
-    compute_ranking_metrics,
-    mrr,
-    pool_recovery_rate,
-    recovery_rate,
-)
+from facm.metrics.ranking import compute_ranking_metrics
 
 
 def test_mrr_and_recall():
@@ -16,20 +11,6 @@ def test_mrr_and_recall():
     assert m["hit_at_5"] == 1.0
     assert m["recall_at_5"] == 1.0
     assert m["ndcg_at_10"] > 0.0
-
-
-def test_recovery_rate():
-    assert abs(recovery_rate(1.0, 0.4, 0.7) - 0.5) < 1e-9
-    assert recovery_rate(0.5, 0.5, 0.6) is None
-
-
-def test_pool_recovery_rate():
-    # pre=0.0 → post=1.0 closes 100% of the gap
-    assert abs(pool_recovery_rate(0.0, 1.0) - 1.0) < 1e-9
-    # pre=0.5 → post=0.75 closes half of remaining gap
-    assert abs(pool_recovery_rate(0.5, 0.75) - 0.5) < 1e-9
-    # already at ceiling → undefined
-    assert pool_recovery_rate(1.0, 1.0) is None
 
 
 def test_cutoff_difficulty():

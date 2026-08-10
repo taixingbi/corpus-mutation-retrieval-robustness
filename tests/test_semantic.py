@@ -32,14 +32,32 @@ def test_boundary_rules_only_no_llm():
         add=["g1_a", "g1_b"],
         mutated_relevant_ids=["g1_a", "g1_b"],
         chunk_payloads={
+            "g1_a": ChunkPayload(text="Pavel died on 6 January"),
+            "g1_b": ChunkPayload(text="1990 in Moscow."),
+        },
+        metadata={"split_pieces": ["Pavel died on 6 January", "1990 in Moscow."]},
+    )
+    out = validate_semantic(m, chat=None, use_llm=True)
+    assert out.semantic.passed is True
+    assert out.semantic.checks["rules_passed"] is True
+    assert out.semantic.checks["answer_not_complete_in_either_piece"] is True
+
+
+def test_boundary_rejects_full_answer_in_one_piece():
+    m = _mut(
+        "boundary",
+        remove=["g1"],
+        add=["g1_a", "g1_b"],
+        mutated_relevant_ids=["g1_a", "g1_b"],
+        chunk_payloads={
             "g1_a": ChunkPayload(text="Pavel died on"),
             "g1_b": ChunkPayload(text="6 January 1990 in Moscow."),
         },
         metadata={"split_pieces": ["Pavel died on", "6 January 1990 in Moscow."]},
     )
-    out = validate_semantic(m, chat=None, use_llm=True)
-    assert out.semantic.passed is True
-    assert out.semantic.checks["rules_passed"] is True
+    out = validate_semantic(m, chat=None, use_llm=False)
+    assert out.semantic.checks["answer_not_complete_in_either_piece"] is False
+    assert out.semantic.passed is False
 
 
 def test_noise_rules_pass_without_llm_relevant():

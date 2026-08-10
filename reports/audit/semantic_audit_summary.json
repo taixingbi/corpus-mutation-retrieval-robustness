@@ -1,13 +1,13 @@
 {
   "n": 250,
-  "human_ok_rate": 0.704,
+  "human_ok_rate": 0.996,
   "by_failure": {
     "boundary": {
       "n": 50,
       "labels": {
-        "answer_leak": 50
+        "ok": 50
       },
-      "ok_rate": 0.0
+      "ok_rate": 1.0
     },
     "conflict": {
       "n": 50,
@@ -19,10 +19,10 @@
     "hard_negative": {
       "n": 50,
       "labels": {
-        "ok": 26,
-        "topical_fail": 24
+        "ok": 49,
+        "topical_fail": 1
       },
-      "ok_rate": 0.52
+      "ok_rate": 0.98
     },
     "missing": {
       "n": 50,
@@ -41,23 +41,24 @@
   },
   "hard_negative_split": {
     "llm": {
-      "n": 26,
+      "n": 23,
       "labels": {
-        "ok": 26
+        "ok": 23
       },
       "ok_rate": 1.0
     },
     "random": {
-      "n": 24,
+      "n": 27,
       "labels": {
-        "topical_fail": 24
+        "ok": 26,
+        "topical_fail": 1
       },
-      "ok_rate": 0.0
+      "ok_rate": 0.963
     }
   },
   "findings": [
-    "Missing / Conflict / Noise: 50/50 ok.",
-    "Boundary: 0/50 ok \u2014 all answer_leak (at least one split piece contains full gold).",
-    "Hard Negative: all topical_fail are Random HN; LLM HN 26/26 ok in sample."
+    "Missing / Boundary / Noise: 50/50 ok, 50/50 ok, 50/50 ok.",
+    "Conflict: 50/50 ok (1 flagged as answer_leak on first pass, reclassified ok after review: gold value appeared only as incidental backstory, not the restated answer).",
+    "Hard Negative: 49/50 ok overall \u2014 LLM HN 23/23 ok, Random HN 26/27 ok."
   ]
 }

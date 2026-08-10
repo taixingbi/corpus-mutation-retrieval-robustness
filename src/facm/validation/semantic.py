@@ -9,7 +9,14 @@ from facm.schemas.models import Mutation, SemanticInfo
 # Structural / leak checks — always required.
 RULE_KEYS = {
     "missing": ("gold_removed", "no_relevant_ids"),
-    "boundary": ("gold_removed", "two_splits", "pieces_present", "pieces_nonempty"),
+    "boundary": (
+        "gold_removed",
+        "two_splits",
+        "pieces_present",
+        "pieces_nonempty",
+        "answer_not_complete_in_either_piece",
+        "answer_covered_by_union",
+    ),
     "hard_negative": ("has_hn_chunk", "answer_not_in_hn", "gold_kept"),
     "conflict": ("has_conflict_chunk", "gold_kept"),
     "noise": ("has_noise", "answer_not_in_noise", "gold_kept"),
@@ -45,9 +52,11 @@ FAILURE_JUDGE_INSTRUCTIONS = {
         "Set topical=true if loosely related OR false if generic distractors (both OK)."
     ),
     "boundary": (
-        "Boundary mutations split supporting evidence across chunks. "
-        "Set failure_intent_ok=true if evidence is split. Set natural=true if fragments "
-        "still look like Wikipedia text. Set topical=true if fragments relate to the gold."
+        "Boundary mutations split the gold answer across chunks so neither piece "
+        "alone contains the full answer. Set failure_intent_ok=true if the answer "
+        "is incomplete in each piece but recoverable from both. Set natural=true "
+        "if fragments still look like Wikipedia text. Set topical=true if fragments "
+        "relate to the gold."
     ),
 }
 
@@ -104,6 +113,14 @@ def rule_checks(mutation: Mutation) -> dict[str, bool]:
         else:
             checks["pieces_present"] = False
             checks["pieces_nonempty"] = False
+        piece_texts = [str(p) for p in pieces] if isinstance(pieces, list) and pieces else texts
+        checks["answer_not_complete_in_either_piece"] = all(
+            not _contains_answer(t, mutation.gold_answer) for t in piece_texts if str(t).strip()
+        ) and bool(piece_texts)
+        union = "".join(str(t) for t in piece_texts)
+        checks["answer_covered_by_union"] = _contains_answer(
+            union, mutation.gold_answer
+        ) or _contains_answer(" ".join(str(t) for t in piece_texts), mutation.gold_answer)
     elif mutation.failure == "hard_negative":
         checks["has_hn_chunk"] = len(mutation.add) >= 1
         checks["answer_not_in_hn"] = not _contains_answer(joined, mutation.gold_answer)

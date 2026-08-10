@@ -23,9 +23,10 @@ Held-out: **E5-large**, **GTE-large** (never used for acceptance).
 ## Research questions
 
 1. **RQ1** — Semantic Validity Rate (SVR) + human audit  
-2. **RQ2** — Behavioral Effectiveness Rate (BER); paired Clean→Mutated metrics  
+2. **RQ2** — Behavioral Effectiveness Rate (BER); paired Clean→Mutated (MRR, Recall@k, Top-k crossing)  
 3. **RQ3** — Held-out transfer; Raw → +Semantic → +Behavioral; Random vs LLM HN  
 
+Appendix (secondary): nDCG@5/10/20 — not used for acceptance.  
 Missing is a **deterministic negative control** (excluded from BER).
 
 ## Setup
@@ -50,18 +51,27 @@ python scripts/ingest_ragfailbench.py \
 
 ## Run
 
+Canonical path is a **full main run** (after operator / validator changes):
+
 ```bash
-# Full main experiment
 facm -c configs/main.yaml run
+```
 
-# Recompute behavior + RQ report from saved rankings (no LLM / no re-retrieval)
+After rankings exist, only re-aggregate metrics (no LLM / no re-retrieval):
+
+```bash
 facm -c configs/main.yaml rebuild-report
+```
 
-# Human semantic audit sample
+Human semantic audit sample (after main mutate+semantic):
+
+```bash
 python scripts/export_semantic_audit.py --per-failure 50
 ```
 
-Pilot archive: `facm -c configs/pilot.yaml run`  
+See [reports/audit/README.md](reports/audit/README.md).
+
+Pilot: `facm -c configs/pilot.yaml run`  
 Smoke: `facm -c configs/smoke.yaml run --skip-llm`
 
 ## Mutations
@@ -72,10 +82,10 @@ Smoke: `facm -c configs/smoke.yaml run --skip-llm`
 | Hard Negative | same entity/relation, wrong plausible fact | LLM |
 | Hard Negative (baseline) | related corpus chunk | Random BM25 |
 | Conflict | contradiction | LLM |
-| Boundary | split gold → pieces A/B | Rule |
+| Boundary | split gold through answer span → A/B | Rule |
 | Noise | distractors | Corpus/LLM + BM25 mine |
 
-Behavioral criteria are **failure-specific** (e.g. HN outrank / Top-5 cross / ΔMRR≥0.10; Noise needs Top-5 entry + meaningful gold drop).
+Behavioral criteria are **failure-specific** (HN outrank / Top-5 cross / ΔMRR≥0.10; Conflict in Top-5 + effect; Noise Top-5 + Δrank≥3 or Top-5 cross; Boundary uses split relevance).
 
 ## Config
 
@@ -87,4 +97,4 @@ include_random_hn_baseline: true
 mutation_oversample: { missing: 1, hard_negative: 1, conflict: 1, boundary: 1, noise: 1 }
 ```
 
-Embeddings cache: `{output_dir}/_embed_cache/`.
+Embeddings cache: `{output_dir}/_embed_cache/` (reused across runs).

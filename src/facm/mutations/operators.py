@@ -39,6 +39,73 @@ def _split_sentence(sentence: str) -> tuple[str, str]:
     return " ".join(words[:mid]), " ".join(words[mid:])
 
 
+def _find_answer_span(text: str, answer: str) -> tuple[int, int] | None:
+    """Case-insensitive span of ``answer`` inside ``text``."""
+    needle = answer.strip()
+    if not needle or not text:
+        return None
+    i = text.lower().find(needle.lower())
+    if i < 0:
+        return None
+    return i, i + len(needle)
+
+
+def _contains_answer(text: str, answer: str) -> bool:
+    a = answer.lower().strip()
+    return bool(a) and a in text.lower()
+
+
+def _mask_complete_answers(text: str, answer: str) -> str:
+    """Replace full answer occurrences so a piece cannot leak the complete gold."""
+    needle = answer.strip()
+    if not needle or not text:
+        return text
+    out = text
+    lower = out.lower()
+    n = needle.lower()
+    # Replace from the end so indices stay valid.
+    starts = []
+    start = 0
+    while True:
+        i = lower.find(n, start)
+        if i < 0:
+            break
+        starts.append(i)
+        start = i + max(1, len(n))
+    for i in reversed(starts):
+        out = out[:i] + "…" + out[i + len(needle) :]
+        lower = out.lower()
+    return out
+
+
+def _split_through_answer(text: str, answer: str) -> tuple[str, str] | None:
+    """Split ``text`` through the gold answer so neither piece alone has the full answer."""
+    span = _find_answer_span(text, answer)
+    if span is None:
+        return None
+    start, end = span
+    if end - start < 2:
+        # Single-char / empty-after-strip answers cannot be split safely.
+        return None
+    mid = start + (end - start) // 2
+    if mid <= start:
+        mid = start + 1
+    if mid >= end:
+        mid = end - 1
+    left, right = text[:mid], text[mid:]
+    # Mask any *complete* leftover answer copies (common in long wiki chunks).
+    a = _mask_complete_answers(left, answer).strip()
+    b = _mask_complete_answers(right, answer).strip()
+    if not a or not b:
+        return None
+    if _contains_answer(a, answer) or _contains_answer(b, answer):
+        return None
+    # First-span union (pre-mask cut) must still cover the answer string.
+    if not _contains_answer(left + right, answer):
+        return None
+    return a, b
+
+
 def _llm_chunk(
     chat: ChatClient,
     *,
@@ -90,74 +157,54 @@ def generate_missing(
 def generate_boundary(
     seed: CleanSeed, corpus: Corpus, *, attempt: int = 1
 ) -> Mutation | None:
-    """Split gold so full evidence is no longer in one chunk.
+    """Split gold through the answer span so neither piece alone contains gold.
 
-    Piece A: surrounding context with the supporting sentence removed.
-    Piece B: supporting sentence (answer-bearing piece).
+    Cut the gold chunk at the midpoint of the ``gold_answer`` occurrence. Piece A
+    keeps the prefix (incl. answer head); piece B keeps the suffix (incl. answer
+    tail). Together they reconstruct the evidence; individually they fail the
+    substring leak check used by semantic validation / human audit.
     """
     gold = corpus.get(seed.gold_chunk_id)
     if gold is None:
         return None
-    sentence = (seed.supporting_sentence or "").strip()
-    if not sentence or sentence not in gold.text:
-        # Fall back to mid-split of gold text; mark second half as answer piece.
-        a, b = _split_sentence(gold.text)
-        if not a or not b:
-            return None
-        suf = "" if attempt == 1 else f"_t{attempt}"
-        id_a = f"{seed.gold_chunk_id}_a{suf}"
-        id_b = f"{seed.gold_chunk_id}_b{suf}"
-        return Mutation(
-            mutation_id=_mid(seed, "boundary", attempt),
-            sample_id=seed.sample_id,
-            failure="boundary",
-            original_gold_ids=[seed.gold_chunk_id],
-            mutated_relevant_ids=[id_a, id_b],
-            add=[id_a, id_b],
-            remove=[seed.gold_chunk_id],
-            chunk_payloads={
-                id_a: ChunkPayload(
-                    text=a,
-                    metadata={
-                        "page_id": gold.page_id,
-                        "revision_id": gold.revision_id,
-                        "page_title": gold.page_title,
-                        "section_title": gold.section_title,
-                        "split": "a",
-                        "role": "context_piece",
-                    },
-                ),
-                id_b: ChunkPayload(
-                    text=b,
-                    metadata={
-                        "page_id": gold.page_id,
-                        "revision_id": gold.revision_id,
-                        "page_title": gold.page_title,
-                        "section_title": gold.section_title,
-                        "split": "b",
-                        "role": "answer_piece",
-                    },
-                ),
-            },
-            generator=GeneratorInfo(model="rule", prompt_id="boundary_split", temperature=0),
-            question=seed.question,
-            gold_answer=seed.gold_answer,
-            metadata={
-                "split_pieces": [a, b],
-                "answer_piece_ids": [id_b],
-                "attempt": attempt,
-            },
-        )
 
-    context = gold.text.replace(sentence, " ").strip()
-    context = " ".join(context.split())
-    if not context:
-        # Ensure A is non-empty: use first half of sentence as weak context.
-        a_fallback, b_fallback = _split_sentence(sentence)
-        context, sentence = a_fallback, b_fallback
+    # Prefer splitting the full gold chunk; fall back to supporting sentence text.
+    candidates = [gold.text]
+    sentence = (seed.supporting_sentence or "").strip()
+    if sentence and sentence in gold.text:
+        candidates.append(sentence)
+    elif sentence:
+        candidates.append(sentence)
+
+    split: tuple[str, str] | None = None
+    for text in candidates:
+        split = _split_through_answer(text, seed.gold_answer)
+        if split is not None:
+            break
+    if split is None:
+        # Last resort: mid-split gold text only if it also satisfies no full-answer leak.
+        a0, b0 = _split_sentence(gold.text)
+        if (
+            a0
+            and b0
+            and not _contains_answer(a0, seed.gold_answer)
+            and not _contains_answer(b0, seed.gold_answer)
+            and _contains_answer(a0 + b0, seed.gold_answer)
+        ):
+            split = (a0, b0)
+    if split is None:
+        return None
+
+    a, b = split
     suf = "" if attempt == 1 else f"_t{attempt}"
     id_a = f"{seed.gold_chunk_id}_a{suf}"
     id_b = f"{seed.gold_chunk_id}_b{suf}"
+    meta_base = {
+        "page_id": gold.page_id,
+        "revision_id": gold.revision_id,
+        "page_title": gold.page_title,
+        "section_title": gold.section_title,
+    }
     return Mutation(
         mutation_id=_mid(seed, "boundary", attempt),
         sample_id=seed.sample_id,
@@ -168,35 +215,24 @@ def generate_boundary(
         remove=[seed.gold_chunk_id],
         chunk_payloads={
             id_a: ChunkPayload(
-                text=context,
-                metadata={
-                    "page_id": gold.page_id,
-                    "revision_id": gold.revision_id,
-                    "page_title": gold.page_title,
-                    "section_title": gold.section_title,
-                    "split": "a",
-                    "role": "context_piece",
-                },
+                text=a,
+                metadata={**meta_base, "split": "a", "role": "answer_prefix"},
             ),
             id_b: ChunkPayload(
-                text=sentence,
-                metadata={
-                    "page_id": gold.page_id,
-                    "revision_id": gold.revision_id,
-                    "page_title": gold.page_title,
-                    "section_title": gold.section_title,
-                    "split": "b",
-                    "role": "answer_piece",
-                },
+                text=b,
+                metadata={**meta_base, "split": "b", "role": "answer_suffix"},
             ),
         },
-        generator=GeneratorInfo(model="rule", prompt_id="boundary_split", temperature=0),
+        generator=GeneratorInfo(
+            model="rule", prompt_id="boundary_answer_span_split", temperature=0
+        ),
         question=seed.question,
         gold_answer=seed.gold_answer,
         metadata={
-            "split_pieces": [context, sentence],
-            "answer_piece_ids": [id_b],
+            "split_pieces": [a, b],
+            "answer_piece_ids": [id_a, id_b],
             "attempt": attempt,
+            "split_mode": "answer_span",
         },
     )
 

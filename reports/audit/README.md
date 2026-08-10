@@ -4,28 +4,18 @@ Manual check that mutations look like valid corpus edits for their failure type.
 
 ## Sample
 
-| File | Contents |
-|------|----------|
-| `semantic_audit_sample.jsonl` | ~50 rows / failure (seed=0), from main semantic mutations |
-| `semantic_audit_summary.json` | Aggregated human labels (written after audit) |
-
-### Labeled results (n=250)
-
-| Failure | ok rate | Notes |
-|---------|---------|--------|
-| missing | 50/50 | — |
-| conflict | 50/50 | — |
-| noise | 50/50 | — |
-| hard_negative | 26/50 | LLM HN 26/26 ok; Random HN 0/24 (`topical_fail`) |
-| boundary | 0/50 | all `answer_leak` (a split piece still holds full gold) |
-
-Overall human ok: **176/250 (70.4%)**. Among auto `semantic_passed`: 171/234 (73.1%).
-
-Regenerate:
+After a main run:
 
 ```bash
 python scripts/export_semantic_audit.py --per-failure 50
 ```
+
+| File | Contents |
+|------|----------|
+| `semantic_audit_sample.jsonl` | ~50 rows / failure (seed=0) |
+| `semantic_audit_summary.json` | Optional aggregate after labeling |
+
+Re-export after regenerating mutations (e.g. full `facm -c configs/main.yaml run`).
 
 ## How to label
 
@@ -36,9 +26,7 @@ For each JSONL row, fill:
 | `auditor_label` | `ok` \| `topical_fail` \| `answer_leak` \| `unnatural` \| `other` |
 | `auditor_notes` | short free text (optional; required for non-`ok`) |
 
-Use the question, `gold_answer`, and `added_texts` (chunks injected by the mutation). Missing has empty `added_texts` (gold removed).
-
-### Labels
+Use the question, `gold_answer`, and `added_texts`. Missing has empty `added_texts` (gold removed).
 
 | Label | Meaning |
 |-------|---------|
@@ -55,19 +43,16 @@ Use the question, `gold_answer`, and `added_texts` (chunks injected by the mutat
 | `missing` | Gold removed; no substitute answer chunk required |
 | `hard_negative` | Same entity/relation, **wrong** plausible fact; topical, does not correctly answer |
 | `conflict` | Contradicts gold / competing claim on the same question |
-| `boundary` | Split gold into incomplete pieces A/B; together cover gold, each alone incomplete |
+| `boundary` | Split **through** gold answer → A/B; neither piece alone contains full gold; union covers it |
 | `noise` | Distractors; may be loosely related; should not be a clean answer substitute |
 
 Do **not** reject because retrieval failed or ranks dropped — that is RQ2.
 
-## Suggested workflow
+## Workflow
 
-1. Open `semantic_audit_sample.jsonl` (one object per line).
-2. Label all rows (or at least 30–50 per failure for the paper).
-3. Keep labels in this file (or copy to `semantic_audit_labeled.jsonl` if you want a clean original).
-4. Report agreement / error rates in RQ1 (e.g. % `ok`, breakdown by failure and error type).
-
-Optional tally after labeling:
+1. Export sample after main semantic stage.
+2. Label ≥30–50 / failure.
+3. Tally for RQ1 (ok rate, error types; split LLM vs Random HN if needed).
 
 ```bash
 python - <<'PY'
@@ -75,7 +60,6 @@ import json
 from collections import Counter
 from pathlib import Path
 path = Path("reports/audit/semantic_audit_sample.jsonl")
-# or: semantic_audit_labeled.jsonl
 labels, by_fail = Counter(), Counter()
 for line in path.open():
     r = json.loads(line)

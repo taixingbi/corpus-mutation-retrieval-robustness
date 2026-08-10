@@ -6,7 +6,6 @@ from facm.metrics.ranking import (
     ndcg_at_k,
     rank_of,
     recall_at_k,
-    recovery_rate,
 )
 
 __all__ = [
@@ -18,5 +17,4 @@ __all__ = [
     "ndcg_at_k",
     "rank_of",
     "recall_at_k",
-    "recovery_rate",
 ]
