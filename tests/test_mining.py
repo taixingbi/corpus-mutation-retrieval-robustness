@@ -64,6 +64,93 @@ def test_generate_random_hard_negative():
     assert is_random_hn(mut.model_dump(mode="json"))
 
 
+def test_report_excludes_semantic_fail_from_rq3_accepted():
+    """RQ3 held-out n must match RQ2 BER (semantic ∧ accepted)."""
+    mutations = [
+        {
+            "mutation_id": "ok_hn",
+            "failure": "hard_negative",
+            "semantic": {"passed": True},
+            "metadata": {"baseline": "llm"},
+            "generator": {"prompt_id": "hard_negative"},
+        },
+        {
+            "mutation_id": "bad_hn",
+            "failure": "hard_negative",
+            "semantic": {"passed": False},
+            "metadata": {"baseline": "llm"},
+            "generator": {"prompt_id": "hard_negative"},
+        },
+    ]
+    summary = [
+        {
+            "mutation_id": "ok_hn",
+            "failure": "hard_negative",
+            "accepted": True,
+            "bm25_pass": True,
+            "dense_pass": True,
+            "hybrid_pass": True,
+        },
+        {
+            "mutation_id": "bad_hn",
+            "failure": "hard_negative",
+            "accepted": True,
+            "bm25_pass": True,
+            "dense_pass": True,
+            "hybrid_pass": True,
+        },
+    ]
+    retrieval = [
+        {
+            "stage": "clean",
+            "sample_id": "s",
+            "retriever": "e5_large",
+            "retriever_role": "held_out",
+            "mrr": 0.5,
+            "recall_at_5": 1.0,
+            "ranked_ids": ["g"],
+            "relevant_ids": ["g"],
+        },
+        {
+            "stage": "mutated",
+            "mutation_id": "ok_hn",
+            "sample_id": "s",
+            "failure": "hard_negative",
+            "retriever": "e5_large",
+            "retriever_role": "held_out",
+            "mrr": 0.2,
+            "recall_at_5": 0.0,
+            "ranked_ids": ["x"],
+            "relevant_ids": ["g"],
+        },
+        {
+            "stage": "mutated",
+            "mutation_id": "bad_hn",
+            "sample_id": "s",
+            "failure": "hard_negative",
+            "retriever": "e5_large",
+            "retriever_role": "held_out",
+            "mrr": 0.1,
+            "recall_at_5": 0.0,
+            "ranked_ids": ["x"],
+            "relevant_ids": ["g"],
+        },
+    ]
+    report = build_rq_report(
+        mutations=mutations, behavior_summary=summary, retrieval=retrieval
+    )
+    assert report["rq2_behavioral_effectiveness"]["ber_by_failure"]["hard_negative"][
+        "behaviorally_effective"
+    ] == 1
+    assert (
+        report["rq3_transferability"]["held_out_by_failure"]["hard_negative"][
+            "e5_large"
+        ]["n"]
+        == 1
+    )
+    assert report["rq3_random_baseline"]["llm_hard_negative"]["n_accepted"] == 1
+
+
 def test_report_excludes_random_from_primary_rq1():
     mutations = [
         {

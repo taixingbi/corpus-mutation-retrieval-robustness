@@ -399,7 +399,9 @@ def rebuild_report(cfg: AppConfig) -> Path:
             }
         )
         if ok:
-            accepted_mutations.append(mutation)
+            # Keep accepted artifacts aligned with paper: semantic ∧ behavioral.
+            if mutation.semantic and mutation.semantic.passed:
+                accepted_mutations.append(mutation)
 
     out_dir = cfg.output_path / "4_behavior"
     write_jsonl(out_dir / "behavior_validation.jsonl", rows)

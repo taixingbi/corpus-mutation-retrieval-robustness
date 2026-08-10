@@ -135,15 +135,17 @@ def build_rq_report(
 
     primary_ids = {m["mutation_id"] for m in primary}
     summary_by_mid = {s["mutation_id"]: s for s in behavior_summary}
-    accepted_ids = {
-        mid
-        for mid, s in summary_by_mid.items()
-        if s.get("accepted") and mid in primary_ids
-    }
     sem_pass_ids = {
         m["mutation_id"]
         for m in primary
         if (m.get("semantic") or {}).get("passed")
+    }
+    # Paper definition: accepted = semantic_passed ∧ construction majority.
+    # Never count semantic-failed mutations in RQ2/RQ3/ablation.
+    accepted_ids = {
+        mid
+        for mid, s in summary_by_mid.items()
+        if s.get("accepted") and mid in primary_ids and mid in sem_pass_ids
     }
 
     # RQ2 BER — exclude missing from BER table
