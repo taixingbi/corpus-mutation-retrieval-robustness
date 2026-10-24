@@ -1,0 +1,266 @@
+{
+  "criteria": {
+    "delta_mrr_threshold": 0.1,
+    "majority": 2,
+    "note": "Original frozen criteria; top-20 only (gold outside top-20 is null)."
+  },
+  "n_accepted_primary": 885,
+  "n_construction_only": 566,
+  "construction_only_by_failure": {
+    "hard_negative": 262,
+    "conflict": 266,
+    "boundary": 37,
+    "noise": 1
+  },
+  "held_out_buckets_by_failure_retriever": {
+    "hard_negative": {
+      "e5_large": {
+        "n": 350,
+        "counts": {
+          "enters_top20_gold_stable": 265,
+          "challenged": 83,
+          "mutation_never_top20": 2
+        },
+        "rates": {
+          "enters_top20_gold_stable": 0.7571428571428571,
+          "challenged": 0.23714285714285716,
+          "mutation_never_top20": 0.005714285714285714
+        }
+      },
+      "gte_large": {
+        "n": 350,
+        "counts": {
+          "enters_top20_gold_stable": 267,
+          "challenged": 82,
+          "mutation_never_top20": 1
+        },
+        "rates": {
+          "enters_top20_gold_stable": 0.7628571428571429,
+          "challenged": 0.2342857142857143,
+          "mutation_never_top20": 0.002857142857142857
+        }
+      }
+    },
+    "conflict": {
+      "e5_large": {
+        "n": 365,
+        "counts": {
+          "enters_top20_gold_stable": 272,
+          "challenged": 93
+        },
+        "rates": {
+          "enters_top20_gold_stable": 0.7452054794520548,
+          "challenged": 0.2547945205479452
+        }
+      },
+      "gte_large": {
+        "n": 365,
+        "counts": {
+          "enters_top20_gold_stable": 277,
+          "challenged": 88
+        },
+        "rates": {
+          "enters_top20_gold_stable": 0.7589041095890411,
+          "challenged": 0.2410958904109589
+        }
+      }
+    },
+    "boundary": {
+      "e5_large": {
+        "n": 165,
+        "counts": {
+          "challenged": 116,
+          "enters_top20_no_challenge_signal": 49
+        },
+        "rates": {
+          "challenged": 0.703030303030303,
+          "enters_top20_no_challenge_signal": 0.296969696969697
+        }
+      },
+      "gte_large": {
+        "n": 165,
+        "counts": {
+          "challenged": 102,
+          "enters_top20_no_challenge_signal": 60,
+          "mutation_never_top20": 2,
+          "enters_top20_gold_stable": 1
+        },
+        "rates": {
+          "challenged": 0.6181818181818182,
+          "enters_top20_no_challenge_signal": 0.36363636363636365,
+          "mutation_never_top20": 0.012121212121212121,
+          "enters_top20_gold_stable": 0.006060606060606061
+        }
+      }
+    },
+    "noise": {
+      "e5_large": {
+        "n": 5,
+        "counts": {
+          "challenged": 4,
+          "enters_top20_gold_stable": 1
+        },
+        "rates": {
+          "challenged": 0.8,
+          "enters_top20_gold_stable": 0.2
+        }
+      },
+      "gte_large": {
+        "n": 5,
+        "counts": {
+          "challenged": 4,
+          "enters_top20_gold_stable": 1
+        },
+        "rates": {
+          "challenged": 0.8,
+          "enters_top20_gold_stable": 0.2
+        }
+      }
+    }
+  },
+  "mutation_level_transfer": {
+    "hard_negative": {
+      "construction_only_no_heldout_challenge": 262,
+      "nontransfer_gold_stable": 271,
+      "transfers_to_at_least_one_heldout": 88,
+      "challenged_both_or_one": 77,
+      "nontransfer_never_top20": 1,
+      "nontransfer_mixed_never_top20": 1
+    },
+    "conflict": {
+      "construction_only_no_heldout_challenge": 266,
+      "nontransfer_gold_stable": 283,
+      "transfers_to_at_least_one_heldout": 99,
+      "challenged_both_or_one": 82
+    },
+    "boundary": {
+      "transfers_to_at_least_one_heldout": 128,
+      "challenged_both_or_one": 90,
+      "construction_only_no_heldout_challenge": 37,
+      "nontransfer_in_top20_weak_effect": 72,
+      "nontransfer_never_top20": 2,
+      "nontransfer_gold_stable": 1
+    },
+    "noise": {
+      "transfers_to_at_least_one_heldout": 4,
+      "challenged_both_or_one": 4,
+      "construction_only_no_heldout_challenge": 1,
+      "nontransfer_gold_stable": 1
+    }
+  },
+  "clean_gold_at1_attribute": {
+    "hard_negative": {
+      "e5_large": {
+        "n": 350,
+        "clean_gold_at1": 67,
+        "clean_gold_at1_rate": 0.19142857142857142,
+        "nontransfer_and_clean_gold_at1": 9,
+        "nontransfer_and_clean_gold_at1_rate": 0.025714285714285714
+      },
+      "gte_large": {
+        "n": 350,
+        "clean_gold_at1": 58,
+        "clean_gold_at1_rate": 0.1657142857142857,
+        "nontransfer_and_clean_gold_at1": 7,
+        "nontransfer_and_clean_gold_at1_rate": 0.02
+      }
+    },
+    "conflict": {
+      "e5_large": {
+        "n": 365,
+        "clean_gold_at1": 71,
+        "clean_gold_at1_rate": 0.19452054794520549,
+        "nontransfer_and_clean_gold_at1": 8,
+        "nontransfer_and_clean_gold_at1_rate": 0.021917808219178082
+      },
+      "gte_large": {
+        "n": 365,
+        "clean_gold_at1": 57,
+        "clean_gold_at1_rate": 0.15616438356164383,
+        "nontransfer_and_clean_gold_at1": 9,
+        "nontransfer_and_clean_gold_at1_rate": 0.024657534246575342
+      }
+    },
+    "boundary": {
+      "e5_large": {
+        "n": 165,
+        "clean_gold_at1": 138,
+        "clean_gold_at1_rate": 0.8363636363636363,
+        "nontransfer_and_clean_gold_at1": 43,
+        "nontransfer_and_clean_gold_at1_rate": 0.2606060606060606
+      },
+      "gte_large": {
+        "n": 165,
+        "clean_gold_at1": 112,
+        "clean_gold_at1_rate": 0.6787878787878788,
+        "nontransfer_and_clean_gold_at1": 38,
+        "nontransfer_and_clean_gold_at1_rate": 0.23030303030303031
+      }
+    },
+    "noise": {
+      "e5_large": {
+        "n": 5,
+        "clean_gold_at1": 0,
+        "clean_gold_at1_rate": 0.0,
+        "nontransfer_and_clean_gold_at1": 0,
+        "nontransfer_and_clean_gold_at1_rate": 0.0
+      },
+      "gte_large": {
+        "n": 5,
+        "clean_gold_at1": 1,
+        "clean_gold_at1_rate": 0.2,
+        "nontransfer_and_clean_gold_at1": 0,
+        "nontransfer_and_clean_gold_at1_rate": 0.0
+      }
+    }
+  },
+  "construction_reject_reasons": {
+    "hard_negative": {
+      "n_rejected": 111,
+      "aggregate_reasons": {
+        "majority_fail": 111
+      },
+      "per_retriever_fail_reasons": {
+        "no_meaningful_hn_effect": 257
+      }
+    },
+    "conflict": {
+      "n_rejected": 156,
+      "aggregate_reasons": {
+        "majority_fail": 156
+      },
+      "per_retriever_fail_reasons": {
+        "conflict_in_top5_but_weak": 298,
+        "conflict_not_in_top5": 73
+      }
+    },
+    "boundary": {
+      "n_rejected": 86,
+      "aggregate_reasons": {
+        "majority_fail": 86
+      },
+      "per_retriever_fail_reasons": {
+        "splits_still_cover_top5": 183,
+        "clean_gold_not_in_top5": 44
+      }
+    },
+    "noise": {
+      "n_rejected": 526,
+      "aggregate_reasons": {
+        "majority_fail": 526
+      },
+      "per_retriever_fail_reasons": {
+        "noise_in_top5_but_gold_stable": 1483,
+        "noise_not_in_top5": 67
+      }
+    }
+  },
+  "bucket_definitions": {
+    "challenged": "ΔMRR>0 or Recall@5 drops vs clean",
+    "mutation_never_top20": "No failure chunk in held-out top-20",
+    "enters_top20_gold_stable": "Failure chunk in top-20 (or N/A for boundary splits) but gold best-rank unchanged within top-20; not challenged",
+    "enters_top20_no_challenge_signal": "Not challenged, mutation present / gold moved, but ΔMRR/R@5 challenge definition not met",
+    "construction_only_no_heldout_challenge": "Behaviorally accepted on construction (≥2/3) but neither E5 nor GTE challenged",
+    "clean_gold_at1": "Overlapping attribute: clean gold already rank-1 on that held-out retriever (hard to displace)"
+  }
+}

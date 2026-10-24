@@ -1,0 +1,740 @@
+{
+  "source_mutations": "data/runs/main/3_semantic/mutation.jsonl",
+  "source_retrieval": "data/runs/main/5_benchmark/retrieval_result.jsonl",
+  "configurations": [
+    {
+      "name": "Lenient",
+      "delta_mrr_threshold": 0.05,
+      "majority": 2,
+      "metrics": {
+        "n_accepted": 885,
+        "ber_by_failure": {
+          "hard_negative": {
+            "semantically_valid": 461,
+            "behaviorally_effective": 350,
+            "behavioral_effectiveness_rate": 0.7592190889370932
+          },
+          "conflict": {
+            "semantically_valid": 521,
+            "behaviorally_effective": 365,
+            "behavioral_effectiveness_rate": 0.7005758157389635
+          },
+          "boundary": {
+            "semantically_valid": 251,
+            "behaviorally_effective": 165,
+            "behavioral_effectiveness_rate": 0.6573705179282868
+          },
+          "noise": {
+            "semantically_valid": 531,
+            "behaviorally_effective": 5,
+            "behavioral_effectiveness_rate": 0.009416195856873822
+          },
+          "pooled": {
+            "semantically_valid": 1764,
+            "behaviorally_effective": 885,
+            "behavioral_effectiveness_rate": 0.5017006802721088
+          }
+        },
+        "held_out_challenge": {
+          "hard_negative": {
+            "e5_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.23714285714285716,
+                "ci_low": 0.19428571428571428,
+                "ci_high": 0.2857142857142857
+              }
+            },
+            "gte_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.2342857142857143,
+                "ci_low": 0.19142857142857142,
+                "ci_high": 0.28285714285714286
+              }
+            },
+            "mean_e5_gte": {
+              "n": 700,
+              "challenge_rate": {
+                "n": 700,
+                "mean": 0.2357142857142857,
+                "ci_low": 0.2057142857142857,
+                "ci_high": 0.26857142857142857
+              }
+            }
+          },
+          "conflict": {
+            "e5_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2547945205479452,
+                "ci_low": 0.21095890410958903,
+                "ci_high": 0.2986986301369862
+              }
+            },
+            "gte_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2410958904109589,
+                "ci_low": 0.19452054794520549,
+                "ci_high": 0.2876712328767123
+              }
+            },
+            "mean_e5_gte": {
+              "n": 730,
+              "challenge_rate": {
+                "n": 730,
+                "mean": 0.24794520547945206,
+                "ci_low": 0.21643835616438356,
+                "ci_high": 0.27808219178082194
+              }
+            }
+          },
+          "boundary": {
+            "e5_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.703030303030303,
+                "ci_low": 0.6303030303030303,
+                "ci_high": 0.7696969696969697
+              }
+            },
+            "gte_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.6181818181818182,
+                "ci_low": 0.5333333333333333,
+                "ci_high": 0.6909090909090909
+              }
+            },
+            "mean_e5_gte": {
+              "n": 330,
+              "challenge_rate": {
+                "n": 330,
+                "mean": 0.6606060606060606,
+                "ci_low": 0.6090909090909091,
+                "ci_high": 0.7090909090909091
+              }
+            }
+          },
+          "noise": {
+            "e5_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "gte_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "mean_e5_gte": {
+              "n": 10,
+              "challenge_rate": {
+                "n": 10,
+                "mean": 0.8,
+                "ci_low": 0.5,
+                "ci_high": 1.0
+              }
+            }
+          },
+          "pooled": {
+            "e5_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.3344632768361582,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.36387005649717513
+              }
+            },
+            "gte_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.31186440677966104,
+                "ci_low": 0.280225988700565,
+                "ci_high": 0.34127118644067794
+              }
+            },
+            "mean_e5_gte": {
+              "n": 1770,
+              "challenge_rate": {
+                "n": 1770,
+                "mean": 0.3231638418079096,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.34519774011299437
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Original",
+      "delta_mrr_threshold": 0.1,
+      "majority": 2,
+      "metrics": {
+        "n_accepted": 885,
+        "ber_by_failure": {
+          "hard_negative": {
+            "semantically_valid": 461,
+            "behaviorally_effective": 350,
+            "behavioral_effectiveness_rate": 0.7592190889370932
+          },
+          "conflict": {
+            "semantically_valid": 521,
+            "behaviorally_effective": 365,
+            "behavioral_effectiveness_rate": 0.7005758157389635
+          },
+          "boundary": {
+            "semantically_valid": 251,
+            "behaviorally_effective": 165,
+            "behavioral_effectiveness_rate": 0.6573705179282868
+          },
+          "noise": {
+            "semantically_valid": 531,
+            "behaviorally_effective": 5,
+            "behavioral_effectiveness_rate": 0.009416195856873822
+          },
+          "pooled": {
+            "semantically_valid": 1764,
+            "behaviorally_effective": 885,
+            "behavioral_effectiveness_rate": 0.5017006802721088
+          }
+        },
+        "held_out_challenge": {
+          "hard_negative": {
+            "e5_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.23714285714285716,
+                "ci_low": 0.19428571428571428,
+                "ci_high": 0.2857142857142857
+              }
+            },
+            "gte_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.2342857142857143,
+                "ci_low": 0.19142857142857142,
+                "ci_high": 0.28285714285714286
+              }
+            },
+            "mean_e5_gte": {
+              "n": 700,
+              "challenge_rate": {
+                "n": 700,
+                "mean": 0.2357142857142857,
+                "ci_low": 0.2057142857142857,
+                "ci_high": 0.26857142857142857
+              }
+            }
+          },
+          "conflict": {
+            "e5_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2547945205479452,
+                "ci_low": 0.21095890410958903,
+                "ci_high": 0.2986986301369862
+              }
+            },
+            "gte_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2410958904109589,
+                "ci_low": 0.19452054794520549,
+                "ci_high": 0.2876712328767123
+              }
+            },
+            "mean_e5_gte": {
+              "n": 730,
+              "challenge_rate": {
+                "n": 730,
+                "mean": 0.24794520547945206,
+                "ci_low": 0.21643835616438356,
+                "ci_high": 0.27808219178082194
+              }
+            }
+          },
+          "boundary": {
+            "e5_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.703030303030303,
+                "ci_low": 0.6303030303030303,
+                "ci_high": 0.7696969696969697
+              }
+            },
+            "gte_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.6181818181818182,
+                "ci_low": 0.5333333333333333,
+                "ci_high": 0.6909090909090909
+              }
+            },
+            "mean_e5_gte": {
+              "n": 330,
+              "challenge_rate": {
+                "n": 330,
+                "mean": 0.6606060606060606,
+                "ci_low": 0.6090909090909091,
+                "ci_high": 0.7090909090909091
+              }
+            }
+          },
+          "noise": {
+            "e5_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "gte_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "mean_e5_gte": {
+              "n": 10,
+              "challenge_rate": {
+                "n": 10,
+                "mean": 0.8,
+                "ci_low": 0.5,
+                "ci_high": 1.0
+              }
+            }
+          },
+          "pooled": {
+            "e5_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.3344632768361582,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.36387005649717513
+              }
+            },
+            "gte_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.31186440677966104,
+                "ci_low": 0.280225988700565,
+                "ci_high": 0.34127118644067794
+              }
+            },
+            "mean_e5_gte": {
+              "n": 1770,
+              "challenge_rate": {
+                "n": 1770,
+                "mean": 0.3231638418079096,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.34519774011299437
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Strict",
+      "delta_mrr_threshold": 0.15,
+      "majority": 2,
+      "metrics": {
+        "n_accepted": 885,
+        "ber_by_failure": {
+          "hard_negative": {
+            "semantically_valid": 461,
+            "behaviorally_effective": 350,
+            "behavioral_effectiveness_rate": 0.7592190889370932
+          },
+          "conflict": {
+            "semantically_valid": 521,
+            "behaviorally_effective": 365,
+            "behavioral_effectiveness_rate": 0.7005758157389635
+          },
+          "boundary": {
+            "semantically_valid": 251,
+            "behaviorally_effective": 165,
+            "behavioral_effectiveness_rate": 0.6573705179282868
+          },
+          "noise": {
+            "semantically_valid": 531,
+            "behaviorally_effective": 5,
+            "behavioral_effectiveness_rate": 0.009416195856873822
+          },
+          "pooled": {
+            "semantically_valid": 1764,
+            "behaviorally_effective": 885,
+            "behavioral_effectiveness_rate": 0.5017006802721088
+          }
+        },
+        "held_out_challenge": {
+          "hard_negative": {
+            "e5_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.23714285714285716,
+                "ci_low": 0.19428571428571428,
+                "ci_high": 0.2857142857142857
+              }
+            },
+            "gte_large": {
+              "n": 350,
+              "challenge_rate": {
+                "n": 350,
+                "mean": 0.2342857142857143,
+                "ci_low": 0.19142857142857142,
+                "ci_high": 0.28285714285714286
+              }
+            },
+            "mean_e5_gte": {
+              "n": 700,
+              "challenge_rate": {
+                "n": 700,
+                "mean": 0.2357142857142857,
+                "ci_low": 0.2057142857142857,
+                "ci_high": 0.26857142857142857
+              }
+            }
+          },
+          "conflict": {
+            "e5_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2547945205479452,
+                "ci_low": 0.21095890410958903,
+                "ci_high": 0.2986986301369862
+              }
+            },
+            "gte_large": {
+              "n": 365,
+              "challenge_rate": {
+                "n": 365,
+                "mean": 0.2410958904109589,
+                "ci_low": 0.19452054794520549,
+                "ci_high": 0.2876712328767123
+              }
+            },
+            "mean_e5_gte": {
+              "n": 730,
+              "challenge_rate": {
+                "n": 730,
+                "mean": 0.24794520547945206,
+                "ci_low": 0.21643835616438356,
+                "ci_high": 0.27808219178082194
+              }
+            }
+          },
+          "boundary": {
+            "e5_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.703030303030303,
+                "ci_low": 0.6303030303030303,
+                "ci_high": 0.7696969696969697
+              }
+            },
+            "gte_large": {
+              "n": 165,
+              "challenge_rate": {
+                "n": 165,
+                "mean": 0.6181818181818182,
+                "ci_low": 0.5333333333333333,
+                "ci_high": 0.6909090909090909
+              }
+            },
+            "mean_e5_gte": {
+              "n": 330,
+              "challenge_rate": {
+                "n": 330,
+                "mean": 0.6606060606060606,
+                "ci_low": 0.6090909090909091,
+                "ci_high": 0.7090909090909091
+              }
+            }
+          },
+          "noise": {
+            "e5_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "gte_large": {
+              "n": 5,
+              "challenge_rate": {
+                "n": 5,
+                "mean": 0.8,
+                "ci_low": 0.4,
+                "ci_high": 1.0
+              }
+            },
+            "mean_e5_gte": {
+              "n": 10,
+              "challenge_rate": {
+                "n": 10,
+                "mean": 0.8,
+                "ci_low": 0.5,
+                "ci_high": 1.0
+              }
+            }
+          },
+          "pooled": {
+            "e5_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.3344632768361582,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.36387005649717513
+              }
+            },
+            "gte_large": {
+              "n": 885,
+              "challenge_rate": {
+                "n": 885,
+                "mean": 0.31186440677966104,
+                "ci_low": 0.280225988700565,
+                "ci_high": 0.34127118644067794
+              }
+            },
+            "mean_e5_gte": {
+              "n": 1770,
+              "challenge_rate": {
+                "n": 1770,
+                "mean": 0.3231638418079096,
+                "ci_low": 0.3016949152542373,
+                "ci_high": 0.34519774011299437
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consensus",
+      "delta_mrr_threshold": 0.1,
+      "majority": 3,
+      "metrics": {
+        "n_accepted": 737,
+        "ber_by_failure": {
+          "hard_negative": {
+            "semantically_valid": 461,
+            "behaviorally_effective": 322,
+            "behavioral_effectiveness_rate": 0.6984815618221258
+          },
+          "conflict": {
+            "semantically_valid": 521,
+            "behaviorally_effective": 318,
+            "behavioral_effectiveness_rate": 0.6103646833013435
+          },
+          "boundary": {
+            "semantically_valid": 251,
+            "behaviorally_effective": 94,
+            "behavioral_effectiveness_rate": 0.3745019920318725
+          },
+          "noise": {
+            "semantically_valid": 531,
+            "behaviorally_effective": 3,
+            "behavioral_effectiveness_rate": 0.005649717514124294
+          },
+          "pooled": {
+            "semantically_valid": 1764,
+            "behaviorally_effective": 737,
+            "behavioral_effectiveness_rate": 0.4178004535147392
+          }
+        },
+        "held_out_challenge": {
+          "hard_negative": {
+            "e5_large": {
+              "n": 322,
+              "challenge_rate": {
+                "n": 322,
+                "mean": 0.2236024844720497,
+                "ci_low": 0.17701863354037267,
+                "ci_high": 0.2732919254658385
+              }
+            },
+            "gte_large": {
+              "n": 322,
+              "challenge_rate": {
+                "n": 322,
+                "mean": 0.21739130434782608,
+                "ci_low": 0.17391304347826086,
+                "ci_high": 0.26405279503105583
+              }
+            },
+            "mean_e5_gte": {
+              "n": 644,
+              "challenge_rate": {
+                "n": 644,
+                "mean": 0.2204968944099379,
+                "ci_low": 0.18788819875776397,
+                "ci_high": 0.2531055900621118
+              }
+            }
+          },
+          "conflict": {
+            "e5_large": {
+              "n": 318,
+              "challenge_rate": {
+                "n": 318,
+                "mean": 0.2169811320754717,
+                "ci_low": 0.1761006289308176,
+                "ci_high": 0.2641509433962264
+              }
+            },
+            "gte_large": {
+              "n": 318,
+              "challenge_rate": {
+                "n": 318,
+                "mean": 0.20754716981132076,
+                "ci_low": 0.16037735849056603,
+                "ci_high": 0.25157232704402516
+              }
+            },
+            "mean_e5_gte": {
+              "n": 636,
+              "challenge_rate": {
+                "n": 636,
+                "mean": 0.21226415094339623,
+                "ci_low": 0.18238993710691823,
+                "ci_high": 0.24528301886792453
+              }
+            }
+          },
+          "boundary": {
+            "e5_large": {
+              "n": 94,
+              "challenge_rate": {
+                "n": 94,
+                "mean": 0.8829787234042553,
+                "ci_low": 0.8085106382978723,
+                "ci_high": 0.9468085106382979
+              }
+            },
+            "gte_large": {
+              "n": 94,
+              "challenge_rate": {
+                "n": 94,
+                "mean": 0.8404255319148937,
+                "ci_low": 0.7553191489361702,
+                "ci_high": 0.9042553191489362
+              }
+            },
+            "mean_e5_gte": {
+              "n": 188,
+              "challenge_rate": {
+                "n": 188,
+                "mean": 0.8617021276595744,
+                "ci_low": 0.8085106382978723,
+                "ci_high": 0.9095744680851063
+              }
+            }
+          },
+          "noise": {
+            "e5_large": {
+              "n": 3,
+              "challenge_rate": {
+                "n": 3,
+                "mean": 1.0,
+                "ci_low": 1.0,
+                "ci_high": 1.0
+              }
+            },
+            "gte_large": {
+              "n": 3,
+              "challenge_rate": {
+                "n": 3,
+                "mean": 1.0,
+                "ci_low": 1.0,
+                "ci_high": 1.0
+              }
+            },
+            "mean_e5_gte": {
+              "n": 6,
+              "challenge_rate": {
+                "n": 6,
+                "mean": 1.0,
+                "ci_low": 1.0,
+                "ci_high": 1.0
+              }
+            }
+          },
+          "pooled": {
+            "e5_large": {
+              "n": 737,
+              "challenge_rate": {
+                "n": 737,
+                "mean": 0.30800542740841247,
+                "ci_low": 0.27408412483039346,
+                "ci_high": 0.339246947082768
+              }
+            },
+            "gte_large": {
+              "n": 737,
+              "challenge_rate": {
+                "n": 737,
+                "mean": 0.29579375848032563,
+                "ci_low": 0.2618385345997286,
+                "ci_high": 0.3283921302578019
+              }
+            },
+            "mean_e5_gte": {
+              "n": 1474,
+              "challenge_rate": {
+                "n": 1474,
+                "mean": 0.3018995929443691,
+                "ci_low": 0.27883310719131615,
+                "ci_high": 0.324983039348711
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "original_matches_frozen": {
+    "ok": true,
+    "mismatches": []
+  },
+  "note": "ΔMRR threshold gates hard_negative and conflict only. Noise/boundary rules fixed. Missing excluded from BER. Random HN excluded from primary metrics. Challenge = ΔMRR>0 or Recall@5 drops vs clean.",
+  "finding": "Lenient/Original/Strict identical: ΔMRR∈{0.05,0.10,0.15} not binding; Consensus (3/3) shrinks accepted set 885→737 and pooled BER 50.2%→41.8%."
+}

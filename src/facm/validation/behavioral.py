@@ -22,8 +22,14 @@ def evaluate_failure_criteria(
     clean_ranked: list[str],
     mutated_ranked: list[str],
     top_k: int = 20,
+    delta_mrr_threshold: float = 0.10,
 ) -> tuple[dict[str, bool], dict[str, int | None], dict[str, int | None], dict[str, int | None], str]:
-    """Return hits, clean_rel ranks, mut_rel ranks, fail ranks, reason string."""
+    """Return hits, clean_rel ranks, mut_rel ranks, fail ranks, reason string.
+
+    ``delta_mrr_threshold`` applies only to hard_negative and conflict.
+    Noise / boundary / missing rules are unchanged. Default 0.10 matches the
+    frozen main experiment.
+    """
     gold_ids = list(mutation.original_gold_ids)
     if mutation.failure == "boundary":
         clean_rel_ids = gold_ids
@@ -41,6 +47,17 @@ def evaluate_failure_criteria(
     clean_best = _best_rank(clean_rel)
     mut_best = _best_rank(mut_rel)
     fail_best = _best_rank(fail_ranks)
+    # Stable hit-key name for default threshold (backward compatible artifacts).
+    mrr_hit_key = (
+        "delta_mrr_ge_0_10"
+        if abs(delta_mrr_threshold - 0.10) < 1e-12
+        else "delta_mrr_ge_threshold"
+    )
+    mrr_reason = (
+        "delta_mrr_ge_0_10"
+        if abs(delta_mrr_threshold - 0.10) < 1e-12
+        else "delta_mrr_ge_threshold"
+    )
 
     if mutation.failure == "hard_negative":
         gold_mut = {gid: rank_of(mutated_ranked, gid) for gid in gold_ids}
@@ -53,17 +70,17 @@ def evaluate_failure_criteria(
         gold_mut_out_top5 = gold_mut_best is None or gold_mut_best > 5
         top5_cross = gold_clean_top5 and gold_mut_out_top5
         delta_mrr = _mrr_delta(clean_ranked, mutated_ranked, gold_ids)
-        mrr_drop = delta_mrr >= 0.10
+        mrr_drop = delta_mrr >= delta_mrr_threshold
         hits["hn_outranks_gold"] = hn_outranks
         hits["gold_top5_crossing"] = top5_cross
-        hits["delta_mrr_ge_0_10"] = mrr_drop
+        hits[mrr_hit_key] = mrr_drop
         hits["success"] = hn_outranks or top5_cross or mrr_drop
         if hn_outranks:
             reason = "failure_chunk_outranks_gold"
         elif top5_cross:
             reason = "gold_top5_crossing"
         elif mrr_drop:
-            reason = "delta_mrr_ge_0_10"
+            reason = mrr_reason
         else:
             reason = "no_meaningful_hn_effect"
 
@@ -76,10 +93,10 @@ def evaluate_failure_criteria(
             and (gold_mut_best is None or fail_best < gold_mut_best)
         )
         delta_mrr = _mrr_delta(clean_ranked, mutated_ranked, gold_ids)
-        mrr_drop = delta_mrr >= 0.10
+        mrr_drop = delta_mrr >= delta_mrr_threshold
         hits["conflict_enters_top5"] = conflict_top5
         hits["conflict_outranks_gold"] = conflict_outranks
-        hits["delta_mrr_ge_0_10"] = mrr_drop
+        hits[mrr_hit_key] = mrr_drop
         hits["success"] = bool(conflict_top5 and (conflict_outranks or mrr_drop))
         if hits["success"]:
             reason = (
@@ -212,12 +229,14 @@ def validate_behavior_for_retriever(
     clean_ranked: list[str],
     mutated_ranked: list[str],
     top_k: int = 20,
+    delta_mrr_threshold: float = 0.10,
 ) -> BehaviorValidation:
     hits, clean_rel, mut_rel, fail_ranks, reason = evaluate_failure_criteria(
         mutation,
         clean_ranked=clean_ranked,
         mutated_ranked=mutated_ranked,
         top_k=top_k,
+        delta_mrr_threshold=delta_mrr_threshold,
     )
     if mutation.failure == "missing":
         difficulty: Difficulty | None = None
