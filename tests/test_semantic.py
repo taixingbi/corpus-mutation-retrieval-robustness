@@ -82,3 +82,32 @@ def test_hn_requires_llm_when_available_but_rules_block_leak():
     assert checks["answer_not_in_hn"] is False
     out = validate_semantic(m, chat=None, use_llm=False)
     assert out.semantic.passed is False
+
+
+def test_hn_llm_gate_fail_closed_when_judge_unavailable():
+    m = _mut(
+        "hard_negative",
+        add=["hn1"],
+        chunk_payloads={"hn1": ChunkPayload(text="A related but wrong death date.")},
+    )
+    out = validate_semantic(m, chat=None, use_llm=True)
+    assert out.semantic.checks.get("llm_unavailable") is True
+    assert out.semantic.checks.get("llm_gate_passed") is False
+    assert out.semantic.passed is False
+
+
+def test_hn_llm_gate_fail_closed_on_parse_failed():
+    from facm.validation.semantic import _llm_passed
+
+    m = _mut(
+        "hard_negative",
+        add=["hn1"],
+        chunk_payloads={"hn1": ChunkPayload(text="A related but wrong death date.")},
+    )
+    checks = {
+        "has_hn_chunk": True,
+        "answer_not_in_hn": True,
+        "gold_kept": True,
+        "llm_parse_failed": True,
+    }
+    assert _llm_passed(m, checks) is False

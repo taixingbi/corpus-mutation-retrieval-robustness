@@ -213,14 +213,14 @@ def _llm_passed(mutation: Mutation, checks: dict) -> bool:
     keys = LLM_REQUIRED_KEYS.get(mutation.failure)
     if not keys:
         return True
-    # Fail-open when judge unavailable / truncated / unparsable — rules already passed.
+    # Fail-closed: unavailable / error / truncated / unparsable judge => gate fails.
     if (
         checks.get("llm_unavailable")
         or checks.get("llm_error")
         or checks.get("llm_parse_failed")
         or checks.get("llm_truncated")
     ):
-        return True
+        return False
     return all(bool(checks.get(k)) for k in keys)
 
 

@@ -106,7 +106,7 @@ Held-out **challenge** (RQ3): `ΔMRR > 0` **or** `ΔRecall@5 > 0` (same predicat
 
 ## Semantic validation + human audit (Methods)
 
-**Rules** always apply (leak / structural checks). An **LLM judge** (`openai.gpt-oss-120b-1:0`, temperature 0) is required only for Hard Negative and Conflict (`natural` ∧ `failure_intent_ok`). Missing / Boundary / Noise are rule-only. If the judge response is truncated or unparsable after retry, the gate **fails open** (rules already passed). See Appendix B for prompts.
+**Rules** always apply (leak / structural checks). An **LLM judge** (`openai.gpt-oss-120b-1:0`, temperature 0) is required only for Hard Negative and Conflict (`natural` ∧ `failure_intent_ok`). Missing / Boundary / Noise are rule-only. If the judge response is truncated or unparsable after retry, the gate **fails closed** (mutation rejected). Offline audit of the frozen main `3_semantic/mutation.jsonl`: judge pass 982 / reject 37 / fail-closed-trigger 0 on primary HN+Conflict (n=1019), so changing open→closed does not alter frozen RQ1–RQ3. See Appendix B for prompts.
 
 **Human audit (RQ1, semantic only — not BER):**
 
@@ -225,7 +225,7 @@ Source: `src/facm/mutations/operators.py`.
 
 ## Appendix B — LLM semantic judge (verbatim)
 
-**Gate:** required only for `hard_negative` and `conflict` (`llm_natural` ∧ `llm_failure_intent_ok`). Fail-open on truncated / unparsable judge after one retry.
+**Gate:** required only for `hard_negative` and `conflict` (`llm_natural` ∧ `llm_failure_intent_ok`). Fail-closed on truncated / unparsable / unavailable judge after one retry.
 
 ### System
 
