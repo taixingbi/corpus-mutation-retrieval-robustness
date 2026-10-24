@@ -96,7 +96,11 @@ Acceptance requires **semantic pass** and **construction majority** (≥2 of BM2
 | Boundary | Clean gold in Top-5 **AND** (split R@5 &lt; 1 **OR** first relevant &gt; 5 **OR** R@5 drops) |
 | Missing | Never behaviorally accepted (operation success tracked separately) |
 
-Held-out **challenge** (RQ3): ΔMRR &gt; 0 **or** Recall@5 drops vs clean.
+**Δ sign convention (locked):** `ΔX = clean_X − mutated_X`. Positive Δ = degradation (drop). Reported in `rq_report.json` as `delta_mrr` / `delta_recall@5`.
+
+Held-out **challenge** (RQ3): `ΔMRR > 0` **or** `ΔRecall@5 > 0` (same predicate in `src/facm/reporting/report.py`).
+
+**Boundary relevance mapping:** clean metrics use the single gold chunk; mutated metrics use the **two** answer-span split pieces as `relevant_ids`. So mutated Recall@5 ∈ {0, 0.5, 1.0}. This is intentional (measures incomplete split coverage), not a sign bug.
 
 ---
 
@@ -139,6 +143,8 @@ Offline recomputation from frozen rankings (`scripts/threshold_sensitivity.py`).
 Offline from the Original accepted set (`scripts/failure_taxonomy.py`). Ranks are top-20 only (gold outside top-20 is unknown). Full tables: `reports/main/failure_taxonomy.md`.
 
 Among **885** primary accepted mutations, **566 (64.0%)** challenge neither E5 nor GTE (construction-only). For HN/Conflict (~24% per-retriever challenge), non-transfer is dominated by **mutation in Top-20 but gold rank stable** (~75–76%), not by mutations missing from Top-20 (&lt;1%). Boundary transfers much more often (~62–70% challenged).
+
+**Boundary CR decomposition (audit, not a wording patch):** High Boundary CR is **not** from Recall@5 rising. On accepted held-out Boundary (n=165): mean `ΔRecall@5` is **positive** (E5 +0.34, GTE +0.29) = Recall **drops**; mean `ΔMRR` can be **negative** on GTE (−0.07) = MRR **rises**. Challenged rows are mostly **R@5-only** (E5: 95 R5-only / 6 MRR-only / 15 both). Mechanically, ~60–65% of cases retrieve exactly one split piece in Top-5 ⇒ Recall goes 1.0→0.5 and fires the R@5 branch of composite CR, while MRR (first relevant only) can stay flat or improve. Full audit: `reports/main/challenge_definition_audit.md` (`scripts/challenge_definition_audit.py`).
 
 | Failure | Retriever | Challenged | Never Top-20 | Top-20, gold stable | n |
 |---|---|---|---|---|---|
@@ -265,6 +271,7 @@ See `reports/audit/README.md` and aggregate `reports/audit/semantic_audit_summar
 # Offline only — does not overwrite frozen rq_report.json / 4_behavior for Original claims
 python scripts/threshold_sensitivity.py
 python scripts/failure_taxonomy.py
+python scripts/challenge_definition_audit.py
 ```
 
-Artifacts: `reports/main/threshold_sensitivity.{json,md}`, `reports/main/failure_taxonomy.{json,md}`.
+Artifacts: `reports/main/threshold_sensitivity.{json,md}`, `reports/main/failure_taxonomy.{json,md}`, `reports/main/challenge_definition_audit.{json,md}`.

@@ -647,6 +647,11 @@
             "mean": 0.005714285714285714,
             "ci_low": 0.0,
             "ci_high": 0.014285714285714285
+          },
+          "challenge_components": {
+            "mrr_only": 81,
+            "r5_only": 0,
+            "both": 2
           }
         },
         "gte_large": {
@@ -668,6 +673,11 @@
             "mean": 0.005714285714285714,
             "ci_low": 0.0,
             "ci_high": 0.014285714285714285
+          },
+          "challenge_components": {
+            "mrr_only": 80,
+            "r5_only": 0,
+            "both": 2
           }
         }
       },
@@ -691,6 +701,11 @@
             "mean": 0.005479452054794521,
             "ci_low": 0.0,
             "ci_high": 0.0136986301369863
+          },
+          "challenge_components": {
+            "mrr_only": 91,
+            "r5_only": 0,
+            "both": 2
           }
         },
         "gte_large": {
@@ -712,6 +727,11 @@
             "mean": 0.010958904109589041,
             "ci_low": 0.0027397260273972603,
             "ci_high": 0.021917808219178082
+          },
+          "challenge_components": {
+            "mrr_only": 84,
+            "r5_only": 0,
+            "both": 4
           }
         }
       },
@@ -735,6 +755,11 @@
             "mean": 0.3393939393939394,
             "ci_low": 0.30303030303030304,
             "ci_high": 0.37575757575757573
+          },
+          "challenge_components": {
+            "mrr_only": 6,
+            "r5_only": 95,
+            "both": 15
           }
         },
         "gte_large": {
@@ -756,6 +781,11 @@
             "mean": 0.2909090909090909,
             "ci_low": 0.24242424242424243,
             "ci_high": 0.33636363636363636
+          },
+          "challenge_components": {
+            "mrr_only": 4,
+            "r5_only": 86,
+            "both": 12
           }
         }
       },
@@ -779,6 +809,11 @@
             "mean": 0.0,
             "ci_low": 0.0,
             "ci_high": 0.0
+          },
+          "challenge_components": {
+            "mrr_only": 4,
+            "r5_only": 0,
+            "both": 0
           }
         },
         "gte_large": {
@@ -800,6 +835,11 @@
             "mean": 0.0,
             "ci_low": 0.0,
             "ci_high": 0.0
+          },
+          "challenge_components": {
+            "mrr_only": 4,
+            "r5_only": 0,
+            "both": 0
           }
         }
       }
@@ -833,7 +873,7 @@
         }
       }
     },
-    "note": "Held-out = E5-large + GTE-large on behaviorally accepted set. Challenge = ΔMRR>0 or Recall@5 drops vs clean."
+    "note": "Held-out = E5-large + GTE-large on behaviorally accepted set. Δ = clean − mutated (positive = degradation). Challenge = ΔMRR>0 or ΔRecall@5>0. challenge_components counts MRR-only / R@5-only / both among challenged rows. Boundary mutated relevance = two split pieces (len=2) vs clean gold (len=1); high Boundary CR is typically R@5-only from incomplete piece coverage, while mean ΔMRR can be negative (MRR rises)."
   },
   "rq3_random_baseline": {
     "llm_hard_negative": {

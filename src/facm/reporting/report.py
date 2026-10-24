@@ -35,6 +35,12 @@ def _challenge_flags(
     clean: dict[tuple[str, str], dict],
     mids: set[str],
 ) -> list[float]:
+    """Held-out challenge: MRR drop or Recall@5 drop vs clean.
+
+    Sign convention (everywhere in this module):
+      delta_X = clean_X - mutated_X
+      positive delta => degradation. Challenge iff delta_mrr>0 or delta_r5>0.
+    """
     flags: list[float] = []
     for r in mutated:
         if r.get("retriever_role") != "held_out":
@@ -400,6 +406,9 @@ def build_rq_report(
                 "challenged": drop_mrr > 0.0 or drop_r5 > 0.0,
                 "delta_mrr": drop_mrr,
                 "delta_recall@5": drop_r5,
+                "mrr_only": drop_mrr > 0.0 and not (drop_r5 > 0.0),
+                "r5_only": drop_r5 > 0.0 and not (drop_mrr > 0.0),
+                "both": drop_mrr > 0.0 and drop_r5 > 0.0,
             }
         )
     rq3_summary = {}
@@ -423,6 +432,11 @@ def build_rq_report(
                     n_boot=n_boot,
                     seed=bootstrap_seed + 12,
                 ),
+                "challenge_components": {
+                    "mrr_only": sum(1 for x in rows if x["mrr_only"]),
+                    "r5_only": sum(1 for x in rows if x["r5_only"]),
+                    "both": sum(1 for x in rows if x["both"]),
+                },
             }
 
     ablation = _ablation(
@@ -570,7 +584,12 @@ def build_rq_report(
             "ablation_validation_filters": ablation,
             "note": (
                 "Held-out = E5-large + GTE-large on behaviorally accepted set. "
-                "Challenge = ΔMRR>0 or Recall@5 drops vs clean."
+                "Δ = clean − mutated (positive = degradation). "
+                "Challenge = ΔMRR>0 or ΔRecall@5>0. "
+                "challenge_components counts MRR-only / R@5-only / both among challenged rows. "
+                "Boundary mutated relevance = two split pieces (len=2) vs clean gold (len=1); "
+                "high Boundary CR is typically R@5-only from incomplete piece coverage, "
+                "while mean ΔMRR can be negative (MRR rises)."
             ),
         },
         "rq3_random_baseline": random_baseline,

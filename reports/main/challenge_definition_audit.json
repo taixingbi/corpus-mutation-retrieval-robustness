@@ -1,0 +1,219 @@
+{
+  "delta_convention": "delta_X = clean_X - mutated_X. Positive => degradation (drop). Challenge <=> delta_mrr>0 OR delta_recall@5>0 (src/facm/reporting/report.py).",
+  "relevance_mapping": {
+    "clean_stage": "relevant_ids = [original gold chunk] (len=1)",
+    "mutated_stage": "relevant_ids = mutation.mutated_relevant_ids (boundary: two split pieces, len=2; others: usually gold, len=1)",
+    "code": "pipeline.stage0_clean_baseline / stage4_benchmark → _make_result → compute_ranking_metrics"
+  },
+  "by_failure_held_out": {
+    "boundary": {
+      "e5_large": {
+        "n": 165,
+        "challenge_rate": 0.703030303030303,
+        "mean_delta_mrr": 0.017457912457912457,
+        "mean_delta_recall@5": 0.3393939393939394,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 13,
+        "challenge_components": {
+          "mrr_only": 6,
+          "r5_only": 95,
+          "both": 15
+        },
+        "mean_clean_r5": 0.9939393939393939,
+        "mean_mut_r5": 0.6545454545454545,
+        "relevant_len": {
+          "clean": {
+            "1": 165
+          },
+          "mutated": {
+            "2": 165
+          }
+        },
+        "split_pieces_in_top5": {
+          "0": 3,
+          "1": 108,
+          "2": 54
+        }
+      },
+      "gte_large": {
+        "n": 165,
+        "challenge_rate": 0.6181818181818182,
+        "mean_delta_mrr": -0.06587061087061087,
+        "mean_delta_recall@5": 0.2909090909090909,
+        "n_r5_rise": 6,
+        "n_mrr_rise": 33,
+        "challenge_components": {
+          "mrr_only": 4,
+          "r5_only": 86,
+          "both": 12
+        },
+        "mean_clean_r5": 0.9333333333333333,
+        "mean_mut_r5": 0.6424242424242425,
+        "relevant_len": {
+          "clean": {
+            "1": 165
+          },
+          "mutated": {
+            "2": 165
+          }
+        },
+        "split_pieces_in_top5": {
+          "0": 9,
+          "1": 100,
+          "2": 56
+        }
+      }
+    },
+    "hard_negative": {
+      "e5_large": {
+        "n": 350,
+        "challenge_rate": 0.23714285714285716,
+        "mean_delta_mrr": 0.0918015873015873,
+        "mean_delta_recall@5": 0.005714285714285714,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 81,
+          "r5_only": 0,
+          "both": 2
+        },
+        "mean_clean_r5": 0.26857142857142857,
+        "mean_mut_r5": 0.26285714285714284,
+        "relevant_len": {
+          "clean": {
+            "1": 350
+          },
+          "mutated": {
+            "1": 350
+          }
+        }
+      },
+      "gte_large": {
+        "n": 350,
+        "challenge_rate": 0.2342857142857143,
+        "mean_delta_mrr": 0.08154184704184704,
+        "mean_delta_recall@5": 0.005714285714285714,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 80,
+          "r5_only": 0,
+          "both": 2
+        },
+        "mean_clean_r5": 0.25142857142857145,
+        "mean_mut_r5": 0.24571428571428572,
+        "relevant_len": {
+          "clean": {
+            "1": 350
+          },
+          "mutated": {
+            "1": 350
+          }
+        }
+      }
+    },
+    "conflict": {
+      "e5_large": {
+        "n": 365,
+        "challenge_rate": 0.2547945205479452,
+        "mean_delta_mrr": 0.09672547391725475,
+        "mean_delta_recall@5": 0.005479452054794521,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 91,
+          "r5_only": 0,
+          "both": 2
+        },
+        "mean_clean_r5": 0.273972602739726,
+        "mean_mut_r5": 0.2684931506849315,
+        "relevant_len": {
+          "clean": {
+            "1": 365
+          },
+          "mutated": {
+            "1": 365
+          }
+        }
+      },
+      "gte_large": {
+        "n": 365,
+        "challenge_rate": 0.2410958904109589,
+        "mean_delta_mrr": 0.07496482320616084,
+        "mean_delta_recall@5": 0.010958904109589041,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 84,
+          "r5_only": 0,
+          "both": 4
+        },
+        "mean_clean_r5": 0.2410958904109589,
+        "mean_mut_r5": 0.23013698630136986,
+        "relevant_len": {
+          "clean": {
+            "1": 365
+          },
+          "mutated": {
+            "1": 365
+          }
+        }
+      }
+    },
+    "noise": {
+      "e5_large": {
+        "n": 5,
+        "challenge_rate": 0.8,
+        "mean_delta_mrr": 0.07333333333333333,
+        "mean_delta_recall@5": 0.0,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 4,
+          "r5_only": 0,
+          "both": 0
+        },
+        "mean_clean_r5": 0.8,
+        "mean_mut_r5": 0.8,
+        "relevant_len": {
+          "clean": {
+            "1": 5
+          },
+          "mutated": {
+            "1": 5
+          }
+        }
+      },
+      "gte_large": {
+        "n": 5,
+        "challenge_rate": 0.8,
+        "mean_delta_mrr": 0.1637593984962406,
+        "mean_delta_recall@5": 0.0,
+        "n_r5_rise": 0,
+        "n_mrr_rise": 0,
+        "challenge_components": {
+          "mrr_only": 4,
+          "r5_only": 0,
+          "both": 0
+        },
+        "mean_clean_r5": 0.8,
+        "mean_mut_r5": 0.8,
+        "relevant_len": {
+          "clean": {
+            "1": 5
+          },
+          "mutated": {
+            "1": 5
+          }
+        }
+      }
+    }
+  },
+  "verdict": {
+    "definition_consistent": true,
+    "sign_bug": false,
+    "boundary_recall_rises_on_average": false,
+    "boundary_mrr_can_rise": true,
+    "prior_narrative_error": "High Boundary CR was previously attributed to Recall@5 rising; data show Recall@5 drops (positive mean ΔR@5) and CR is R@5-only dominated. MRR often rises (negative mean ΔMRR on GTE)."
+  }
+}
